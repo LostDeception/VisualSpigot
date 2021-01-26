@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="Content-Security-Policy" content="script-src 'self';">
+        
+        <title>Visual Spigot</title>
+
+        <!-- include scripts -->
+        <script src="../node_modules/awesome-notifications/dist/index.var.js"></script>
+
+        <!-- code mirror implementation -->
+        <script src="../node_modules/codemirror/lib/codemirror.js"></script>
+        <script src="../node_modules/codemirror/mode/yaml/yaml.js"></script>
+        <link rel="stylesheet" href="../node_modules/codemirror/lib/codemirror.css">
+        <link rel="stylesheet" href="../node_modules/codemirror/theme/darcula.css">
+
+        <!-- include all stylesheets -->
+        <link rel="stylesheet" href="../node_modules/@fortawesome/fontawesome-free/css/all.css">
+        <link rel="stylesheet" href="../node_modules/awesome-notifications/dist/style.css"></link>
+        <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.css">
+        <link rel="stylesheet" href="../node_modules/codemirror/lib/codemirror.css">
+        <link rel="stylesheet" href="../node_modules/animate.css/animate.css">
+        <link rel="stylesheet" href="./style.css">
+    </head>
+    <body>
+
+        <!-- blured background image -->
+        <div class="background"></div>
+
+        <!-- server download overlay -->
+        <div class="overlay fadeInSlow" id="server-download-overlay">
+            <label></label>
+            <div class="progress">
+                <div class="progress-bar progress-bar-striped bg-success progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+            </div>
+        </div>
+
+        <!-- main container to hold all server management containers -->
+        <div id="main-container">
+            <div id="container-header">
+                <button id="btn-add-server" class="custom-button">Add Server</button>
+                <div class="custom-dropdown">
+                    <button id="btn-dropdown-servers" class="dropbtn">Select A Server</button>
+                    <div id="dropdown-servers" class="dropdown-content scroller"></div>
+                </div>
+
+                <div id="container-header-end">
+                    <button id="btn-start-server" class="custom-button" disabled>Start</button>
+                    <button id="btn-stop-server" class="custom-button" disabled>Stop</button>
+                    <button id="btn-kill-server" class="custom-button" disabled>Kill</button>
+                    <button id="btn-restart-server" class="custom-button" disabled>Restart</button>
+                </div>
+            </div>
+            <div id="logo-container">
+                <img id="logo" src="./images/logo.png">
+            </div>
+            <div id="console" style="display: none;">
+                <div id="console-container" class="scroller"></div>
+                <div id="server-input-container">
+                    <input id="server-console-input" spellcheck="false" placeholder="Type a command...">
+                    <div id="input-button-container">
+                        <button id="btn-file-explorer" class="custom-button" data-toggle="tooltip" data-placement="top" title="server files"><i class="fas fa-folder"></i></button>
+                        <button id="btn-delete-server" class="custom-button" data-toggle="tooltip" data-placement="top" title="delete server"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADD SERVER MODAL -->
+        <div class="modal fadeIn" id="addServerModel" tabindex="-1" role="dialog" aria-hidden="true">
+            <div id="add-server-container" class="modal-dialog modal-dialog-centered" role="document">
+                <div id="add-server-content" class="modal-content">
+                    <div class="modal-body">
+                        <ul class="nav nav-tabs" id="myTab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link rounded-0 active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Manual</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link rounded-0" id="spigot-tab" data-toggle="tab" href="#spigot" role="tab" aria-controls="spigot" aria-selected="false">Spigot</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link rounded-0" id="paper-tab" data-toggle="tab" href="#paper" role="tab" aria-controls="paper" aria-selected="false">Paper</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link rounded-0" id="other-tab" data-toggle="tab" href="#other" role="tab" aria-controls="other" aria-selected="false">Other</a>
+                            </li>
+                        </ul>
+
+                        <button class="modal-button close-modal" data-dismiss="modal" aria-label="Close"><i class="fa fa-times"></i></button>
+
+                        <div class="tab-content">
+
+                            <div class="tab-pane show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                                <div id="file-drop-container">
+                                    <h6 id="file-drop-notify">drop server .jar file here</h6>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane" id="spigot" role="tabpanel" aria-labelledby="spigot-tab">
+                                <ul class="add-server-list list-group list-group-flush rounded-0 scroller">
+
+                                    <!-- 1.16.5 DOWNLOADS -->
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Spigot 1.16.5
+                                    <button class="custom-button server-download" data-url="https://cdn.getbukkit.org/spigot/spigot-1.16.5.jar" data-filename="spigot-1.16.5.jar">Download</button>
+                                    </li>
+
+                                    <!-- 1.16.4 DOWNLOADS -->
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Spigot 1.16.4
+                                    <button class="custom-button server-download" data-url="https://cdn.getbukkit.org/spigot/spigot-1.16.4.jar" data-filename="spigot-1.16.4.jar">Download</button>
+                                    </li>
+
+                                    <!-- 1.15.2 DOWNLOADS -->
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Spigot 1.15.2
+                                    <button class="custom-button server-download" data-url="https://cdn.getbukkit.org/spigot/spigot-1.15.2.jar" data-filename="spigot-1.15.2.jar">Download</button>
+                                    </li>
+
+                                    <!-- 1.14.4 DOWNLOADS -->
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Spigot 1.14.4
+                                    <button class="custom-button server-download" data-url="https://cdn.getbukkit.org/spigot/spigot-1.14.4.jar" data-filename="spigot-1.14.4.jar">Download</button>
+                                    </li>
+
+                                    <!-- 1.13.2 DOWNLOADS -->
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Spigot 1.13.2
+                                        <button class="custom-button server-download" data-url="https://cdn.getbukkit.org/spigot/spigot-1.13.2.jar" data-filename="spigot-1.13.2.jar">Download</button>
+                                    </li>
+
+                                    <!-- 1.12.2 DOWNLOADS -->
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Spigot 1.12.2
+                                        <button class="custom-button server-download" data-url="https://cdn.getbukkit.org/spigot/spigot-1.12.2.jar" data-filename="spigot-1.12.2.jar">Download</button>
+                                    </li>
+
+                                    <!-- 1.11.2 DOWNLOADS -->
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Spigot 1.11.2
+                                        <button class="custom-button server-download" data-url="https://cdn.getbukkit.org/spigot/spigot-1.11.2.jar" data-filename="spigot-1.11.2.jar">Download</button>
+                                    </li>
+
+                                    <!-- 1.10.2 DOWNLOADS -->
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Spigot 1.10.2
+                                        <button class="custom-button server-download" data-url="https://cdn.getbukkit.org/spigot/spigot-1.10.2-R0.1-SNAPSHOT-latest.jar" data-filename="spigot-1.10.2.jar">Download</button>
+                                    </li>
+
+                                    <!-- 1.9.4 DOWNLOADS -->
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Spigot 1.9.4
+                                        <button class="custom-button server-download" data-url="https://cdn.getbukkit.org/spigot/spigot-1.9.4-R0.1-SNAPSHOT-latest.jar" data-filename="spigot-1.9.4.jar">Download</button>
+                                    </li>
+
+                                    <!-- 1.8.8 DOWNLOADS -->
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Spigot 1.8.8
+                                        <button class="custom-button server-download" data-url="https://cdn.getbukkit.org/spigot/spigot-1.8.8-R0.1-SNAPSHOT-latest.jar" data-filename="spigot-1.8.8.jar">Download</button>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div class="tab-pane" id="paper" role="tabpanel" aria-labelledby="paper-tab">
+                                <ul class="add-server-list list-group list-group-flush rounded-0 scroller">
+
+                                    <!-- 1.16.4 DOWNLOADS -->
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Paper 1.16.5
+                                        <button class="custom-button server-download" data-url="https://papermc.io/api/v2/projects/paper/versions/1.16.5/builds/428/downloads/paper-1.16.5-428.jar" data-filename="paper-1.16.5.jar">Download</button>
+                                    </li>
+
+                                    <!-- 1.16.4 DOWNLOADS -->
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Paper 1.16.4
+                                    <button class="custom-button server-download" data-url="https://papermc.io/api/v2/projects/paper/versions/1.16.4/builds/408/downloads/paper-1.16.4-408.jar" data-filename="paper-1.16.4.jar">Download</button>
+                                    </li>
+
+                                    <!-- 1.15.2 DOWNLOADS -->
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Paper 1.15.2
+                                    <button class="custom-button server-download" data-url="https://papermc.io/api/v2/projects/paper/versions/1.15.2/builds/391/downloads/paper-1.15.2-391.jar" data-filename="paper-1.15.2.jar">Download</button>
+                                    </li>
+
+                                    <!-- 1.14.4 DOWNLOADS -->
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Paper 1.14.4
+                                    <button class="custom-button server-download" data-url="https://papermc.io/api/v2/projects/paper/versions/1.14.4/builds/243/downloads/paper-1.14.4-243.jar" data-filename="paper-1.14.4.jar">Download</button>
+                                    </li>
+
+                                    <!-- 1.13.2 DOWNLOADS -->
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Paper 1.13.2
+                                        <button class="custom-button server-download" data-url="https://papermc.io/api/v2/projects/paper/versions/1.13.2/builds/655/downloads/paper-1.13.2-655.jar" data-filename="paper-1.13.2.jar">Download</button>
+                                    </li>
+
+                                    <!-- 1.12.2 DOWNLOADS -->
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Paper 1.12.2
+                                        <button class="custom-button server-download" data-url="https://papermc.io/api/v2/projects/paper/versions/1.12.2/builds/1618/downloads/paper-1.12.2-1618.jar" data-filename="paper-1.12.2.jar">Download</button>
+                                    </li>
+
+                                    <!-- 1.11.2 DOWNLOADS -->
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Paper 1.11.2
+                                        <button class="custom-button server-download" data-url="https://papermc.io/api/v2/projects/paper/versions/1.11.2/builds/1104/downloads/paper-1.11.2-1104.jar" data-filename="paper-1.11.2.jar">Download</button>
+                                    </li>
+
+                                    <!-- 1.10.2 DOWNLOADS -->
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Paper 1.10.2
+                                        <button class="custom-button server-download" data-url="https://papermc.io/api/v2/projects/paper/versions/1.10.2/builds/916/downloads/paper-1.10.2-916.jar" data-filename="paper-1.10.2.jar">Download</button>
+                                    </li>
+
+                                    <!-- 1.9.4 DOWNLOADS -->
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Paper 1.9.4
+                                        <button class="custom-button server-download" data-url="https://papermc.io/api/v2/projects/paper/versions/1.9.4/builds/773/downloads/paper-1.9.4-773.jar" data-filename="paper-1.9.4.jar">Download</button>
+                                    </li>
+
+                                    <!-- 1.8.8 DOWNLOADS -->
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Paper 1.8.8
+                                        <button class="custom-button server-download" data-url="https://papermc.io/api/v2/projects/paper/versions/1.8.8/builds/443/downloads/paper-1.8.8-443.jar" data-filename="paper-1.8.8.jar">Download</button>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div class="tab-pane" id="other" role="tabpanel" aria-labelledby="other-tab">
+                                <ul class="add-server-list list-group list-group-flush rounded-0 scroller">
+
+                                    <!-- 1.16.5 DOWNLOADS -->
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Purpur 1.16.5
+                                        <button class="custom-button server-download" data-url="https://purpur.pl3x.net/api/v1/purpur/1.16.5/958/download" data-filename="purpur-1.16.5.jar">Download</button>
+                                    </li>
+
+                                    <!-- 1.16.4 DOWNLOADS -->
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Tuinity 1.16.5
+                                        <button class="custom-button server-download" data-url="https://ci.codemc.io/job/Spottedleaf/job/Tuinity/lastSuccessfulBuild/artifact/tuinity-paperclip.jar" data-filename="tuinity-1.16.5.jar">Download</button>
+                                    </li>
+
+                                    <!-- 1.16.4 DOWNLOADS -->
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Magma bb50f45
+                                        <button class="custom-button server-download" data-url="https://ci.hexeption.dev/job/Magma%20Foundation/job/Magma/job/master/lastSuccessfulBuild/artifact/build/distributions/Magma-bb50f45-server.jar" data-filename="magma.jar">Download</button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FILE LIST MODAL -->
+        <div class="modal fadeIn" id="serverFilesModal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div id="file-list-container" class="modal-dialog modal-dialog-centered" role="document">
+                <div id="file-list-content" class="modal-content">
+                    <div id="file-list-body" class="modal-body">
+                        <div id="file-list-header">
+
+                            <!-- START OF FILE-LIST HEADER -->
+                            <div id="file-list-header-start">
+                                <button id="btn-back-dir" class="custom-button" tabindex="-1"><i class="fas fa-arrow-left"></i></button>
+                                <button id="btn-open-dir" class="custom-button" tabindex="-1" title="Open file"><i class="fas fa-folder"></i></button>
+                                <button id="btn-save-file" class="custom-button" tabindex="-1" title="Save file"><i class="fas fa-save"></i></button>
+                            </div>
+
+                            <!-- CENTER OF FILE-LIST HEADER -->
+                            <div id="file-list-header-middle">
+                                <div id="file-list-notification-container">
+                                    <label id="fs-dir-text"></label>
+
+                                    <!-- Notification to be displayed on file save -->
+                                    <p id="file-saved-notification" class="fadeOut" style="display: none;">Saved</p>
+                                </div>
+                            </div>
+
+                            <!-- END OF FILE-LIST HEADER -->
+                            <div id="file-list-header-end">
+                                <input id="file-list-search" placeholder="Search..." spellcheck="false">
+                            </div>
+                        </div>
+
+                        <!-- list of generated server files -->
+                        <div id="file-list" class="list-group list-group-flush"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Load main render script -->
+        <script src="./js/render_main.js"></script>
+    </body>
+</html>

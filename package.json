@@ -1,0 +1,46 @@
+{
+  "name": "VisualSpigot",
+  "version": "1.0.7",
+  "description": "",
+  "main": "app/js/main.js",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "build": "electron-builder build --win --publish never",
+    "deploy": "electron-builder build --win --publish always"
+  },
+  "build": {
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico",
+      "publish": [
+        "github"
+      ]
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LostDeception/VisualSpigot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^10.2.0"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^5.15.2",
+    "animate.css": "^4.1.1",
+    "awesome-notifications": "^3.1.1",
+    "bootstrap": "^4.5.3",
+    "codemirror": "^5.59.1",
+    "download-file": "^0.1.5",
+    "electron-updater": "^4.3.5",
+    "jquery": "^3.5.1",
+    "minecraft-data": "^2.72.0",
+    "module-alias": "^2.2.2",
+    "popper.js": "^1.16.1",
+    "rimraf": "^3.0.2",
+    "store": "^2.0.12",
+    "v8-compile-cache": "^2.2.0"
+  }
+}
