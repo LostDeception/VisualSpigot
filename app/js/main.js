@@ -1,7 +1,6 @@
-/* -- Author: Timothy Mickelson
- * -- Version: 1.0.0
- * -- 1/6/2021
- */
+// =========================================================
+// Copyright 2021, Timothy Mickelson, All rights reserved.
+// =========================================================
 const { app, BrowserWindow, Menu, ipcMain, dialog } = require('electron');
 const { autoUpdater } = require("electron-updater");
 const url = require('url');
@@ -37,15 +36,16 @@ if (!gotTheLock) {
             }
         })
 
+        // get app cache size.. if cache is greater than 10000mb clear
         let result = await win.webContents.session.getCacheSize();
         if(result > 10000) {
             await win.webContents.session.clearCache();
         }
 
-        // -- open dev panel
-        //win.webContents.openDevTools();
+        // open dev panel
+        win.webContents.openDevTools();
     
-        // -- load html file in browserwindow
+        // load html file in browserwindow
         win.loadURL(url.format({
             pathname: path.join(__dirname, '../index.html'),
             protocol: 'file:', 
@@ -58,35 +58,36 @@ if (!gotTheLock) {
             app.quit();
     });
  
+    // when the application is ready to be displayed
     app.whenReady().then(() => {
         resourceFolderCheck(true, async() => {
     
-            // -- by default set application menu to null
+            // by default set application menu to null
             Menu.setApplicationMenu(null);
 
-            // -- check for updates
+            // check for updates
             autoUpdater.checkForUpdates();
     
-            // -- create main window
+            // create main window
             await createWindow();
     
-            // -- when DOM finished loading display window
+            // when DOM finished loading display window
             win.once('ready-to-show', function() {
                 win.show();
             });
     
-            // Continue to handle mainWindow "close" event here
+            // continue to handle mainWindow "close" event here
             win.on('close', function(e){
                 if(!force_quit){
                     e.preventDefault();
                     //win.hide();
     
-                    // -- handle any tasks before application exit
+                    // handle any tasks before application exit
                     win.webContents.send("renderAppClose");
                 }
             });
     
-            // -- after all tasks have been handled quit the application
+            // after all tasks have been handled quit the application
             ipcMain.on('mainAppClose', function() {
                 force_quit=true; 
                 app.quit();
@@ -94,10 +95,11 @@ if (!gotTheLock) {
         })
     })
     
+    // if servers folder does not exist create it
     function resourceFolderCheck(production, callback) {
     
         if(production) {
-            //let exePath = path.dirname (app.getPath ('exe'));
+            // let exePath = path.dirname (app.getPath ('exe'));
             let yourDbRootPath = app.getPath('userData');
             let dir = path.join(yourDbRootPath, 'minecraft_servers');
     

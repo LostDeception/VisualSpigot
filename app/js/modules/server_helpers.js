@@ -1,4 +1,7 @@
-var fs = require('fs');
+// =========================================================
+// Copyright 2021, Timothy Mickelson, All rights reserved.
+// =========================================================
+var fs = require('fs-extra');
 var path = require('path');
 var store = require('store');
 var rmdir = require('rimraf');
@@ -21,12 +24,11 @@ class DomHandler {
 
         // server console elements
         this.console = document.getElementById('console');
-        this.console_container = this.console.childNodes[0];
-        this.console_input = this.console.childNodes[1].childNodes[0];
+        this.console_container = document.getElementById('console-container');
+        this.console_input = document.getElementById('server-console-input');
         this.btn_open_directory = document.getElementById('btn-file-explorer');
         this.btn_delete_server = document.getElementById('btn-delete-server');
         this.btn_server_downloads = document.querySelectorAll('.server-download');
-        this.server_download_overlay = document.getElementById('server-download-overlay');
 
         // SERVER HEADER ELEMENTS
         this.btn_dropdown_servers = document.getElementById('btn-dropdown-servers');
@@ -105,20 +107,23 @@ class DomHandler {
         }
     }
 
-    display_download_overlay(server_name) {
+    display_overlay(text) {
 
-        // -- close the add-server modal
-        $('#addServerModel').modal('hide');
+        // hide any visible modals
+        $('.modal').modal('hide');
+
+        // get overlay element from DOM
+        let overlay = document.getElementById('application-overlay');
 
         // -- display server-download overlay
-        let text = "Downloading: " + server_name;
-        this.server_download_overlay.childNodes[0].textContent = text;
-        this.server_download_overlay.style.display = 'flex';
+        overlay.childNodes[0].textContent = text;
+        overlay.style.display = 'flex';
     }
 
-    hide_download_overlay() {
-        this.server_download_overlay.childNodes[0].textContent = '';
-        this.server_download_overlay.style.display = 'none';
+    hide_overlay() {
+        let overlay = document.getElementById('application-overlay');
+        overlay.childNodes[0].textContent = '';
+        overlay.style.display = 'none';
     }
 
     create_tab_item(server_name) {
@@ -178,6 +183,18 @@ class DomHandler {
         return c;
     }
 
+    replace_server_console(console) {
+        // -- replace console element in console container
+        let container = this.console_container;
+        if (container.childNodes.length > 0) {
+            container.replaceChild(console, container.childNodes[0]);
+        } else {
+            container.appendChild(console);
+        }
+
+        container.scrollTop = container.scrollHeight;
+    }
+
     removeAllChildNodes(parent) {
         while (parent.firstChild) {
             parent.removeChild(parent.firstChild);
@@ -186,6 +203,7 @@ class DomHandler {
 
     updateServerState(server, state) {
 
+        // display main container is not being displayed
         if(!this.mainContainerDisplayed) {
             this.console.style.display = 'flex';
             this.logo_container.style.display = 'none';
@@ -236,222 +254,6 @@ class DomHandler {
         }
     }
 
-    input_auto_completion(commands) {
-
-        // -- shorthand for document
-        var doc = document;
-
-        // -- suggestion container
-        var container = doc.createElement("div");
-        container.classList.add('autocomplete');
-        container.style.userSelect = 'none';
-
-        // -- suggestion container style
-        var containerStyle = container.style;
-        containerStyle.position = 'absolute';
-
-        // -- console input
-        var input = this.console_input;
-
-        // -- get keys in commands object
-        var keys = Object.keys(commands);
-
-        
-        /**
-         * -- when user presses key
-         * -- check if input value has a suggestion
-         */
-        input.addEventListener('keyup', function(e) {
-
-            // -- e is undefined set to window event
-            if(!e) { e = window.event; }
-
-            // -- get keycode 
-            var keyCode = e.code || e.key;
-
-            // -- check that user is not pressing tab
-            if(keyCode !== 'Tab') {
-
-                // -- get input value text to lowercase
-                let text = this.value.toLowerCase();
-
-                // -- if input has no value than detach suggestion container
-                if(text !== '') {
-
-                    // -- variable to hold found suggestions
-                    let suggestions = '';
-
-                    // -- get full command thus far
-                    let cmd = text.substr(0, text.lastIndexOf(' '));
-
-                    // -- check if commands contains current command
-                    if(commands[cmd]) {
-
-                        // -- get last word
-                        let n = text.split(" ");
-                        let lastWord =  n[n.length - 1];
-
-                        // -- all sub args for current command path
-                        suggestions = commands[cmd].filter(n => n.startsWith(lastWord));
-                    } else {
-                        // -- all base args for command paths
-                        suggestions = keys.filter(n => !n.includes(' ') && n.startsWith(text));
-                    }
-                    
-                    // -- check if suggestions were found
-                    if(suggestions != '') {
-
-                        // -- clear container of any elements
-                        container.innerHTML = '';
-
-                        // -- set container suggestions
-                        for(var i = 0; i < suggestions.length; i++) {
-                            let item = doc.createElement('div');
-                            item.innerHTML = suggestions[i];
-                            container.append(item);
-
-                            if(i == 0) {
-                                item.classList.add('selected');
-                            }
-                        }
-
-                        attach();
-                        updatePosition();
-                    } else {
-                        detach();
-                    }
-
-                } else {
-                    detach();
-                }
-            }
-        })
-
-        /**
-         * -- if user presses Tab in input box than cycle suggestions if any
-         * -- if user presses Space than append the selected suggestion to input value
-         */
-        input.addEventListener('keydown', function(e) {
-
-            // -- e is undefined set to window event
-            if(!e) { e = window.event; }
-
-            // -- get keycode 
-            var keyCode = e.code || e.key;
-
-            // -- prevent default tab key functionality
-            if(keyCode == 'Tab') { e.preventDefault(); }
-
-            // -- check that container is being displayed
-            if(containerDisplayed()) {
-
-                // -- get selected element in suggestion container
-                let selected = doc.querySelector('.selected');
-
-                switch(keyCode) {
-
-                    /**
-                     * -- if the container is present than
-                     * -- select next suggestion within it
-                     */
-                    case 'Tab':
-                    
-                        // -- get next sibling element to currently selected element
-                        let sibling = selected.nextElementSibling;
-                        selected.classList.remove('selected');
-
-                        // -- check that there is a sibling
-                        if(sibling) {
-                            sibling.classList.add('selected');
-                        } else {
-                            container.childNodes[0].classList.add('selected');
-                        }
-
-                        break;
-    
-                    /**
-                     * -- append selected suggestion to
-                     * -- the input value
-                     */
-                    case 'Space':
-                        
-                        // -- get input text
-                        let text = input.value.toLowerCase();
-
-                        // -- get all text up to latest command
-                        let cmd = text.substr(0, text.lastIndexOf(' ') + 1);
-
-                        // -- set input value to the updated command
-                        input.value = cmd.concat(selected.innerHTML);
-
-                        break;
-                }
-            }
-        })
-
-        // -- if input loses focus than detach suggestion container
-        input.addEventListener('focusout', function() { detach(); })
-
-
-        /**
-        * Attach the container to DOM
-        */
-        function attach() {
-            if (!container.parentNode) {
-                doc.body.appendChild(container);
-            }
-        }
-
-        /**
-        * Detach the container from DOM
-        */
-        function detach() {
-            var parent = container.parentNode;
-            if (parent) {
-                parent.removeChild(container);
-            }
-        }
-
-        /**
-        * Check if container for autocomplete is displayed
-        */
-        function containerDisplayed() {
-            return !!container.parentNode;
-        }
-
-        /**
-        * Update autocomplete position
-        */
-       function updatePosition() {
-            if (!containerDisplayed()) {
-                return;
-            }
-            containerStyle.height = "auto";
-            containerStyle.width = input.offsetWidth + "px";
-            var maxHeight = 0;
-            var inputRect;
-            function calc() {
-                var docEl = doc.documentElement;
-                var clientLeft = docEl.clientLeft || doc.body.clientLeft || 0;
-                var scrollLeft = window.pageXOffset || docEl.scrollLeft;
-                inputRect = input.getBoundingClientRect();
-                var left = inputRect.left + scrollLeft - clientLeft;
-                containerStyle.left = left + "px";
-                maxHeight = window.innerHeight - (inputRect.top + input.offsetHeight);
-                if (maxHeight < 0) {
-                    maxHeight = 0;
-                }
-
-                containerStyle.bottom = (window.innerHeight - inputRect.bottom + input.offsetHeight) + "px";
-                containerStyle.left = left + "px";
-                containerStyle.maxHeight = "200px";
-            }
-            // the calc method must be called twice, otherwise the calculation may be wrong on resize event (chrome browser)
-            calc();
-            calc();
-        }
-    }
-
     displayBlock(console, icon, title, text) {
 
         let container = document.createElement('div');
@@ -492,15 +294,11 @@ class DomHandler {
         console.parentNode.scrollTop = console.parentNode.scrollHeight;
     }
 
+    // display application logo container
     app_intro_state() {
         this.mainContainerDisplayed = false;
         this.console.style.display = 'none';
         this.logo_container.style.display = 'flex';
-    }
-
-    app_default_state() {
-        this.console.style.display = 'flex';
-        this.logo_container.style.display = 'none';
     }
 
     click_element(element) {
@@ -520,6 +318,20 @@ class DomHandler {
         let parentNode = element.parentNode;
         if(parentNode) {
             parentNode.scrollTop = parentNode.scrollHeight;
+        }
+    }
+
+    displayServerInfo() {
+        var container = document.getElementById('server-information');
+        if(!container.style.display || container.style.display == 'none') {
+            container.style.display = 'flex';
+        }
+    }
+
+    hideServerInfo() {
+        var container = document.getElementById('server-information');
+        if(container.style.display || container.style.display == 'flex') {
+            container.style.display = 'none';
         }
     }
 }
@@ -630,12 +442,19 @@ class ServerHelpers extends DomHandler {
 
     setSelectedServer(server) {
 
-        if(this.server) {
-            this.server.isSelected = false;
+        if(server) {
+            if(this.server) {
+                this.server.isSelected = false;
+            }
+    
+            server.isSelected = true;
+            this.server = server;
         }
 
-        server.isSelected = true;
         this.server = server;
+
+        // replace server console
+        this.replace_server_console(server.console);
     }
 
     isSelectedServer(server) {
@@ -661,63 +480,60 @@ class ServerHelpers extends DomHandler {
         let self = this;
     
         // create random folder id
-        createFolderName(10, (result) => {
+        this.createFolderName(10, (result) => {
             let f_dir = path.join(server_dir, result);
-            let s_dir = path.join(f_dir, file_name);
-            fs.mkdir(f_dir, function (err) {
+            this.createFolder(f_dir, () => {
 
-                if(err) {
-                    callback(err);
-                    return;
-                }
-
-                fs.writeFile(path.join(f_dir, 'eula.txt'), 'eula=true', function (err) {
-
-                    if (err) { callback(err); }
-
-                    try {
-                        let file_content = '';
-                        let properties = self.propObj();
-
-                        // -- for each property in file
-                        for (const prop in properties) {
-                            file_content += prop + '=' + properties[prop] + '\n';
-                        }
-
-                        fs.writeFile(path.join(f_dir, 'server.properties'), file_content, function(err) {
-                            if (err) { callback(err); };
-                            let data = {
-                                folderName: result,
-                                folderDir: f_dir,
-                                serverDir: s_dir
+                // if server files need to be created
+                if(file_name) {
+                    let s_dir = path.join(f_dir, file_name);
+                    let eulaPath = path.join(f_dir, 'eula.txt');
+                    self.createFile(eulaPath, 'eula=true', () => {
+                        try {
+                            let file_content = '';
+                            let properties = self.propObj();
+    
+                            // -- for each property in file
+                            for (const prop in properties) {
+                                file_content += prop + '=' + properties[prop] + '\n';
                             }
-
-                            callback(null, data);
-                        })
-                    } catch(err) {
-                        callback(err);
-                    }
-                })
+    
+                            let propPath = path.join(f_dir, 'server.properties');
+                            self.createFile(propPath, file_content, () => {
+                                callback(null, {
+                                    folderName: result,
+                                    folderDir: f_dir,
+                                    serverDir: s_dir
+                                })
+                            })
+                        } catch(err) {
+                            self.notifier.alert(err.toString());
+                            console.log(err);
+                        }
+                    })
+                } else {
+                    callback(result);
+                }
             })
         })
+    }
 
-        // return random string of text for server folder name
-        function createFolderName(length, callback) {
-            var result = '';
-            var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-            var charactersLength = characters.length;
-            do {
-                result = '';
-                if(length <= 15) {
-                    for ( var i = 0; i < length; i++ ) {
-                        result += characters.charAt(Math.floor(Math.random() * charactersLength));
-                    }
-                    length += 1;
+    // return random string of text for server folder name
+    createFolderName(length, callback) {
+        var result = '';
+        var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        var charactersLength = characters.length;
+        do {
+            result = '';
+            if(length <= 15) {
+                for ( var i = 0; i < length; i++ ) {
+                    result += characters.charAt(Math.floor(Math.random() * charactersLength));
                 }
-            } while(fs.existsSync(result));
-    
-            callback(result);
-        }
+                length += 1;
+            }
+        } while(fs.existsSync(result));
+
+        callback(result);
     }
 
     // parse initial server name and return beautiful string
@@ -790,23 +606,53 @@ class ServerHelpers extends DomHandler {
         })
     }
 
+    // return time from milliseconds
+    msToTime(duration) {
+
+        /**
+            var milliseconds = parseInt((duration % 1000) / 100),
+            seconds = Math.floor((duration / 1000) % 60),
+            minutes = Math.floor((duration / (1000 * 60)) % 60),
+            hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
+        */
+
+        var seconds = Math.floor((duration / 1000) % 60),
+        minutes = Math.floor((duration / (1000 * 60)) % 60),
+        hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
+      
+        hours = (hours < 10) ? "0" + hours : hours;
+        minutes = (minutes < 10) ? "0" + minutes : minutes;
+        seconds = (seconds < 10) ? "0" + seconds : seconds;
+      
+        return hours + ":" + minutes + ":" + seconds;
+    }
+
 
     // FILE HANDLER FUNCTIONS
 
     createFile(filePath, data, callback) {
-        try {
-            if(fs.existsSync(filePath)) {
-                fs.writeFile(filePath, data, (err) => {
-                    if(err) {
-                        throw new Error('Failed to create file ' + path.basename(filePath));
-                    } else {
-                        callback();
-                    }
-                })
-            }
-        } catch(err) {
-            this.notifier.alert(err.toString());
-            console.log(err);
+        if(!fs.existsSync(filePath)) {
+            fs.writeFile(filePath, data, (err) => {
+                if(err) {
+                    this.notifier.alert(err.toString());
+                    console.log(err);
+                } else {
+                    callback();
+                }
+            })
+        }
+    }
+
+    createFolder(filePath, callback) {
+        if(!fs.existsSync(filePath)) {
+            fs.mkdir(filePath, (err) => {
+                if(err) {
+                    this.notifier.alert(err.toString());
+                    console.log(err);
+                } else {
+                    callback();
+                }
+            })
         }
     }
 
@@ -940,6 +786,22 @@ class ServerHelpers extends DomHandler {
         } catch(err) {
             this.notifier.alert(err.toString());
             console.log(err);
+        }
+    }
+
+    copyFiles(srcDir, destDir, callback) {
+        let self = this;
+        if(fs.existsSync(srcDir) && fs.existsSync(destDir)) {
+            fs.copy(srcDir, destDir, err => {
+                if(err) {
+                    self.notifier.alert(err.toString());
+                    console.log(err);
+                }
+
+                setTimeout(() => { callback(); }, 1500);
+            })
+        } else {
+            this.notifier.alert('Files already exist sh-cf');
         }
     }
 }

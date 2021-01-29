@@ -1,16 +1,20 @@
-var fs = require('fs');
+// =========================================================
+// Copyright 2021, Timothy Mickelson, All rights reserved.
+// =========================================================
+var fs = require('fs-extra');
 var path = require('path');
 var download = require('download-file');
-const Server = require('@modules/local_server_process');
+const Server = require('@modules/server_process');
+const Events = require('@modules/events');
 const GlobalCommands = require('@modules/global_commands');
 const ServerHelpers = require('@modules/server_helpers');
 const ServerExplorer = require('@modules/server_explorer');
+const StatsRunnable = require('@modules/stats_runnable');
 
 class ServerHandler extends ServerHelpers {
     
     constructor() {
         super();
-        this.ctrlActive = false;
 
         /**
          * directory to download/copy minecraft servers to
@@ -20,7 +24,16 @@ class ServerHandler extends ServerHelpers {
         let nativeDirectory = path.join(userDataPath, 'VisualSpigot', 'minecraft_servers');
         this.nativeDir = nativeDirectory;
 
+        // handle all application events
+        this.events = new Events();
+
+        // handle file explorer functions
         this.sExplorer = new ServerExplorer(this);
+
+        // handle displaying server statistics to user as needed
+        this.sRunnable = new StatsRunnable(this);
+
+        // handle global command functions
         this.gCommand = new GlobalCommands(this);
 
         /**
@@ -54,7 +67,7 @@ class ServerHandler extends ServerHelpers {
                 server.start((err) => {
                     if(err) {
                         self.updateServerState(server, 'default');
-                        self.notifier.alert(err);
+                        self.notifier.alert(err.toString());
                     }
                 });
             })
@@ -74,7 +87,7 @@ class ServerHandler extends ServerHelpers {
                 self.updateServerState(server, 'default');
                 server.stop().catch((err) => {
                     self.updateServerState(server, 'default');
-                    self.notifier.alert(err);
+                    self.notifier.alert(err.toString());
                 });
             })
         })
@@ -252,7 +265,8 @@ class ServerHandler extends ServerHelpers {
                 let url = btn.dataset.url;
                 let name = btn.dataset.filename;
 
-                self.display_download_overlay(name);
+                // display that server is being downloaded
+                self.display_overlay('Downloading: ' + name);
 
                 self.create_server_folder(self.nativeDir, name, function (err, data) {
 
@@ -273,16 +287,16 @@ class ServerHandler extends ServerHelpers {
                         download(url, options, function (err) {
 
                             if (err) {
-                                self.hide_download_overlay();
-                                self.notifier.alert(err);
+                                self.hide_overlay();
+                                self.notifier.alert(err.toString());
                                 return;
                             } else {
-                                $('#addServerModel').modal('hide');
+                                $('.modal').modal('hide');
                                 self.populate_servers(() => {
                                     let server = self.servers.filter(s => s.directory == f_dir)[0];
                                     server.displayMessage(server.name + ' finished downloading. type \".help\" for a list of commands!', null, false, true);
                                     self.click_element(server.tab);
-                                    self.hide_download_overlay();
+                                    self.hide_overlay();
                                 })
                             }
                         })
@@ -290,6 +304,65 @@ class ServerHandler extends ServerHelpers {
                 })
             })
         });
+    }
+
+
+    /**
+     * copy currently selected server files to 
+     * new directory and re-populate servers
+     */
+    duplicateServerHandler() {
+        this.server_access((server) => {
+            let onOk = () => {
+
+                try {
+
+                    if(!server.isActive) {
+                        this.display_overlay('Duplicating: ' + server.name);
+
+                        // create folder and grab name of said folder
+                        this.create_server_folder(this.nativeDir, null, (result) => {
+                            let srcDir = path.join(server.directory);
+                            let destDir = path.join(srcDir, '../', result);
+                            this.copyFiles(srcDir, destDir, () => {
+                                this.hide_overlay();
+                                this.populate_servers();
+
+                                // selecte cloned server and write some text :P
+                                let server = this.servers.filter(s => s.directory == destDir)[0];
+                                server.displayMessage('I am a clone :P');
+                                this.click_element(server.tab);
+                            })
+                        })
+                    } else {
+                        this.notifier.alert('Cannot duplicate ' + server.name + ' while active');
+                    }
+                    
+                } catch(err) {
+                    this.notifier.alert(err.toString())
+                    this.hide_overlay();
+                    console.log(err);
+                }
+            };
+    
+            let onCancel = () => { };
+    
+            this.notifier.confirm(
+                'Are you sure you want to duplicate ' + server.name,
+                onOk,
+                onCancel,
+                {
+                    icons: {
+                        prefix: "<i class='fas fa fa-fw fa-",
+                        confirm: "exclamation-triangle",
+                        suffix: "' style='color:var(--orange)'></i>"
+                    },
+                    labels: {
+                        confirm: 'Just A Warning'
+                    }
+                }
+            )
+        })
     }
 
     /**
@@ -392,14 +465,13 @@ class ServerHandler extends ServerHelpers {
                                     let server = this.servers.find((s) => { return s.directory == directory; });
                                     if (server === undefined) {
 
-                                        let file_directory = path.join(directory, server_file);
                                         let server_console = this.create_server_console();
                                         let server_tab = this.create_tab_item(name);
 
                                         let server = new Server(this, {
                                             name: name,
                                             dir: directory,
-                                            fDir: file_directory,
+                                            file: server_file,
                                             state: 'default',
                                             tab: server_tab,
                                             console: server_console
@@ -408,18 +480,15 @@ class ServerHandler extends ServerHelpers {
                                         // when user clicks server button
                                         server.tab.addEventListener('click', () => {
                                             if (!server.isSelected) {
+
+                                                // set the selected server and replace console
                                                 self.setSelectedServer(server);
+
+                                                // display main container if not already displayed
                                                 self.updateServerState(server);
-                                
-                                                // -- replace console element in console container
-                                                let container = self.console_container;
-                                                if (container.childNodes.length > 0) {
-                                                    container.replaceChild(server_console, container.childNodes[0]);
-                                                } else {
-                                                    container.appendChild(server_console);
-                                                }
-                                
-                                                container.scrollTop = container.scrollHeight;
+
+                                                // set off event for server swap
+                                                self.events.emit('server-swap');
                                             }
                         
                                             // focus server console input on server selection
@@ -511,10 +580,12 @@ class ServerHandler extends ServerHelpers {
                 }
 
                 self.deleteFile(server.directory, () => {
+                    self.setSelectedServer(null);
                     self.console_container.innerHTML = '';
                     self.populate_servers();
                     self.updateServerState(server, 'waiting');
                     self.btn_dropdown_servers.innerHTML = 'Select A Server';
+                    self.hideServerInfo();
                     self.app_intro_state();
                 })
             })

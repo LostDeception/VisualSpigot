@@ -11,7 +11,7 @@
   /* mainly used for accent colors such as borders */
   --darker-grey: rgb(24, 27, 29);
 
-  --lime: rgb(91, 255, 132);
+  --lime: rgb(118, 206, 140);
   --red: rgb(255, 108, 108);
   --yellow: rgb(255, 241, 116);
   --info: rgb(124, 174, 209);
@@ -207,6 +207,11 @@ span {
   height: 40px;
   border-bottom: 1px solid var(--darker-grey);
 }
+#btn-dropdown-servers {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 #container-header-end {
   height: 39px;
   display: flex;
@@ -229,6 +234,7 @@ span {
 }
 
 #btn-add-server {
+  min-width: 115px;
   background-color: rgba(26, 185, 224, 0.2);
 }
 #btn-add-server:hover {
@@ -315,6 +321,34 @@ span {
   margin-bottom: 5px !important;
 }
 
+/* server information */
+#server-information {
+  width: 255px;
+  height: 28px;
+  color: var(--dim-white);
+  background-color: rgba(24, 27, 29, 0.95);
+  border-radius: 0 0 0 3px;
+  position: absolute;
+  top: 40px;
+  right: 0px;
+  display: none;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  z-index: 1;
+
+  animation-duration: 1s;
+}
+#server-information span {
+  font-size: 12px;
+  font-weight: 500;
+  width: 75px;
+  margin-left: 15px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
 /* server container console */
 .server-console {
   /* setting column-reverse keeps scroll bar pinned to bottom */
@@ -372,11 +406,16 @@ span {
 
 /* input auto-completion styles */
 .autocomplete {
+  width: 400px;
+  height: auto;
+  max-height: 200px;
+  position: absolute;
+  bottom: 45px;
+
   font: 14px/22px "-apple-system", BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
   margin: 0 0 5px 5px;
   padding: 5px;
-  border-radius: 3px;
   background-color: rgb(20, 22, 24);
   border: 1px solid rgba(50, 50, 50, 0.6);
   z-index: 1000;
@@ -423,11 +462,19 @@ span {
 }
 
 /* BOOTSTRAP TAB STYLES */
-.nav-link {
-  margin-bottom: 1px;
+.nav-link,
+.nav-link:hover {
+  border-top: none !important;
+  border-left: none !important;
+  border-right: 1px solid rgba(21, 24, 26, 0.5) !important;
 }
 .nav-link.active {
+  border-bottom: none !important;
   background-color: rgba(17, 20, 22, 0.5) !important;
+}
+#add-server-tabs,
+#manual-tab {
+  border-radius: 5px 0px 0px 0px !important;
 }
 
 /* ADD SERVER MODAL STYLES */
@@ -529,7 +576,7 @@ span {
   background-color: rgb(50, 54, 59);
 }
 #btn-open-dir {
-  min-width: 55px !important;
+  min-width: 35px !important;
   background-color: rgba(26, 185, 224, 0.2);
 }
 #btn-open-dir:hover {

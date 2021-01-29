@@ -1,5 +1,9 @@
+// =========================================================
+// Copyright 2021, Timothy Mickelson, All rights reserved.
+// =========================================================
 var path = require('path');
 var store = require('store');
+var pidusage = require('@gristlabs/pidusage');
 const { exec, spawn } = require('child_process');
 
 class Server {
@@ -9,13 +13,14 @@ class Server {
         // default server values
         this.name = options.name;
         this.directory = options.dir;
-        this.file_directory = options.fDir;
+        this.file = options.file;
+        this.file_directory = path.join(this.directory, this.file);
         this.state = options.state;
         this.tab = options.tab;
         this.console = options.console;
 
-        this.isSelected = false; // check if server is currently selected
-        this.isActive = false; // check if server is currently active
+        this.isSelected = false;
+        this.isActive = false;
         this.prefix = RegExp('\\[\\d+\\:\\d+\\:\\d+.*'); // default prefix before console message
         this.minecraft_color_codes = { // default minecraft color codes to display in console
             '4': '#AA0000',
@@ -43,9 +48,9 @@ class Server {
     }
 
     /**
-     * -- check that server process is not already running
-     * -- spawn server child process and listen for response
-     * -- return process response to server_response emitter
+     * check that server process is not already running
+     * spawn server child process and listen for response
+     * return process response to server_response emitter
      */
     start(callback) {
         
@@ -73,12 +78,15 @@ class Server {
         ];
 
         let spawnOpts = {
-            cwd: path.join(this.file_directory, '../'),
+            cwd: this.directory,
             stdio: ['pipe', 'pipe', 'inherit']
         }
 
         // spawn server process in its native directory
         this.spawn = spawn("java", spawnArgs, spawnOpts);
+
+        // server is starting EVENT
+        this.handler.events.emit('server-starting');
 
         // get and display server output to console
         this.spawn.stdout.on('data', (data) => {
@@ -166,6 +174,11 @@ class Server {
         }, 100);
     }
 
+    // displays/updates server process information
+    serverProcessData() {
+        return pidusage(this.spawn.pid);
+    }
+
     // check for error,warning or info
     isWarning(line) {
         return line.indexOf('WARN') > -1;
@@ -200,7 +213,7 @@ class Server {
             let info_obj = store.get(this.folder_name);
             info_obj.ram = integer;
             store.set(this.folder_name, info_obj);
-            this.displayMessage(this.name + ' ram set to ' + integer, 'var(--info)', false, true);
+            this.displayMessage(this.name + ' ram set to ' + integer, null, false, true);
         } else {
             this.displayMessage('Ram must be greater than 0', 'var(--red)', false, true)
         }
@@ -209,7 +222,7 @@ class Server {
         let info_obj = store.get(this.folder_name);
         info_obj.port = integer;
         store.set(this.folder_name, info_obj);
-        this.displayMessage(this.name + ' port set to ' + integer, 'var(--info)', false, true);
+        this.displayMessage(this.name + ' port set to ' + integer, null, false, true);
     }
 
 

@@ -1,5 +1,5 @@
 // =========================================================
-// Main Script to run at application startup
+// Copyright 2021, Timothy Mickelson, All rights reserved.
 // =========================================================
 const { ipcRenderer } = require('electron');
 require('v8-compile-cache');

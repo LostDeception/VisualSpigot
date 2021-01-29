@@ -1,4 +1,7 @@
-var fs = require('fs');
+// =========================================================
+// Copyright 2021, Timothy Mickelson, All rights reserved.
+// =========================================================
+var fs = require('fs-extra');
 var path = require('path');
 const { shell } = require('electron');
 
