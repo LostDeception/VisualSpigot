@@ -337,7 +337,6 @@ class DomHandler {
 }
 
 class ServerHelpers extends DomHandler {
-
     constructor() {
         super();
         this.server = null;
@@ -422,46 +421,29 @@ class ServerHelpers extends DomHandler {
         }
     }
 
-    // object to write to properties file on server creation
-    propObj() {
-        return {
-            'online-mode': true,
-            'motd': 'Welcome to Visual Spigot!',
-            'server-ip': 'localhost',
-            'server-port': '25565',
-            'global-commands': false,
-            'max-players': 20,
-            'hardcore': false,
-            'pvp': true
-        };
-    }
-
+    // manage selected currently selected server
     getSelectedServer() {
         return this.server;
     }
-
     setSelectedServer(server) {
 
         if(server) {
             if(this.server) {
                 this.server.isSelected = false;
             }
+
+            // replace server console
+            this.replace_server_console(server.console);
     
             server.isSelected = true;
             this.server = server;
         }
 
         this.server = server;
-
-        // replace server console
-        this.replace_server_console(server.console);
     }
-
     isSelectedServer(server) {
         return server == this.getSelectedServer();
     }
-
-    // checks that current server obj is not null/undefined then returns server object in callback
     server_access(callback) {
 
         let server = this.getSelectedServer();
@@ -474,48 +456,42 @@ class ServerHelpers extends DomHandler {
         }
     }
 
+
+
+    // CREATE & POPULATE SERVER HELPERS
+
     // create server folder to copy server files to
     create_server_folder(server_dir, file_name, callback) {
 
-        let self = this;
-    
-        // create random folder id
-        this.createFolderName(10, (result) => {
-            let f_dir = path.join(server_dir, result);
-            this.createFolder(f_dir, () => {
+        try {
+            // create random folder id
+            this.createFolderName(10, (result) => {
 
-                // if server files need to be created
-                if(file_name) {
-                    let s_dir = path.join(f_dir, file_name);
-                    let eulaPath = path.join(f_dir, 'eula.txt');
-                    self.createFile(eulaPath, 'eula=true', () => {
-                        try {
-                            let file_content = '';
-                            let properties = self.propObj();
-    
-                            // -- for each property in file
-                            for (const prop in properties) {
-                                file_content += prop + '=' + properties[prop] + '\n';
-                            }
-    
-                            let propPath = path.join(f_dir, 'server.properties');
-                            self.createFile(propPath, file_content, () => {
-                                callback(null, {
-                                    folderName: result,
-                                    folderDir: f_dir,
-                                    serverDir: s_dir
+                // create folder with required files to run server
+                var f_dir = path.join(server_dir, result);
+                this.createFolder(f_dir, () => {
+
+                    // if server files need to be created
+                    if(file_name) {
+                        this.createBatFile(f_dir, file_name, () => {
+                            this.createEulaFile(f_dir, () => {
+                                this.createPropFile(f_dir, (data) => {
+                                    callback(data);
                                 })
                             })
-                        } catch(err) {
-                            self.notifier.alert(err.toString());
-                            console.log(err);
-                        }
-                    })
-                } else {
-                    callback(result);
-                }
+                        })
+                    } else {
+                        callback(result);
+                    }
+                })
             })
-        })
+        } catch(err) {
+            this.deleteFile(dir, () => {
+                this.hide_overlay();
+                this.notifier.alert(err.toString());
+                console.log(err);
+            })
+        }
     }
 
     // return random string of text for server folder name
@@ -535,6 +511,82 @@ class ServerHelpers extends DomHandler {
 
         callback(result);
     }
+
+    // create run.bat file with pre-built start-script
+    createBatFile(dir, file, callback) {
+        let batPath = path.join(dir, 'run.bat');
+        let start_script = 'java -Xms1G -Xmx2G -jar ' + file + ' nogui';
+
+        // create run.bat file
+        this.createFile(batPath, start_script, (err) => {
+            if(err) {
+                this.fileCreateError();
+                return;
+            }
+
+            callback();
+        })
+    }
+
+    // create eula.txt file which is required to run the server
+    createEulaFile(dir, callback) {
+        let eulaPath = path.join(dir, 'eula.txt');
+        this.createFile(eulaPath, 'eula=true', (err) => {
+
+            if(err) {
+                this.fileCreateError();
+                return;
+            }
+
+            callback();
+        })
+    }
+
+    // create server.properties file with basic properties
+    createPropFile(dir, callback) {
+        let file_content = '';
+            let properties = {
+                'online-mode': true,
+                'motd': 'Welcome to Visual Spigot!',
+                'server-ip': 'localhost',
+                'server-port': '25565',
+                'global-commands': false,
+                'max-players': 20,
+                'hardcore': false,
+                'pvp': true
+            };
+
+            // -- for each property in file
+            for (const prop in properties) {
+                file_content += prop + '=' + properties[prop] + '\n';
+            }
+
+            let propPath = path.join(dir, 'server.properties');
+            this.createFile(propPath, file_content, (err) => {
+                if(err) {
+                    this.fileCreateError();
+                    return;
+                }
+                
+                callback(dir);
+            })
+    }
+
+    /**
+     * if there is an error creating a server
+     * remove all pre-existing files related to the server
+     */
+    fileCreateError() {
+        this.deleteFile(dir, () => {
+            this.hide_overlay();
+            this.notifier.alert(err.toString());
+            console.log(err);
+        })
+    }
+
+
+
+    // GENERAL APPLICATION HELPERS
 
     // parse initial server name and return beautiful string
     get_display_name(jar_file) {
@@ -629,13 +681,13 @@ class ServerHelpers extends DomHandler {
 
 
     // FILE HANDLER FUNCTIONS
-
     createFile(filePath, data, callback) {
         if(!fs.existsSync(filePath)) {
             fs.writeFile(filePath, data, (err) => {
                 if(err) {
                     this.notifier.alert(err.toString());
                     console.log(err);
+                    callback(err);
                 } else {
                     callback();
                 }

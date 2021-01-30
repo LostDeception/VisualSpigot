@@ -12,8 +12,6 @@ class GlobalCommands {
         this.input_auto_completion({
             '.help': [],
             '.info': [],
-            '.port': [],
-            '.ram': [],
             '.rename': [],
             '.duplicate': [],
             '.files': [],
@@ -155,26 +153,6 @@ class GlobalCommands {
                 }
              
             break;
-            case 'port':
-                if(args.length == 2 && args[1]) {
-                    let port = parseInt(args[1]);
-                    if(!isNaN(port)) {
-                        server.setPort(port);
-                    } else {
-                        server.displayMessage('Port must be a number ex:25565', 'var(--red)');
-                    }
-                }
-                break;
-            case 'ram':
-                if(args.length == 2 && args[1]) {
-                    let ram = parseInt(args[1]);
-                    if(!isNaN(ram)) {
-                        server.setRam(ram);
-                    } else {
-                        server.displayMessage('Ram must be a number', 'var(--red)');
-                    }
-                }
-                break;
             
             // open directories on desktop
             case 'open':

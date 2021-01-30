@@ -148,7 +148,6 @@ class ServerHandler extends ServerHelpers {
                         self.console_input.focus();
 
                         break;
-
                     case 'ArrowUp':
                         e.preventDefault();
                         self.getSavedCommand(true);
@@ -192,20 +191,9 @@ class ServerHandler extends ServerHelpers {
                 if (file) {
 
                     if (e.dataTransfer.types == "Files") {
-
-                        self.create_server_folder(self.nativeDir, file.name, function (err, data) {
-
-                            if (err) {
-                                $('#addServerModel').modal('hide');
-                                self.notifier.alert(err.toString());
-                                return;
-                            }
-
-                            if (data) {
-
-                                let f_name = data['folderName'];
-                                let s_dir = data['serverDir'];
-                                let f_dir = data['folderDir'];
+                        self.create_server_folder(self.nativeDir, file.name, function (folder_dir) {
+                            if (folder_dir) {
+                                let s_dir = path.join(f_dir, file.name);
 
                                 // -- copy dropped file to server folder
                                 fs.copyFile(file.path, s_dir, function (err) {
@@ -219,7 +207,7 @@ class ServerHandler extends ServerHelpers {
                                     $('#addServerModel').modal('hide');
 
                                     self.populate_servers(() => {
-                                        let server = self.servers.filter(s => s.directory == f_dir)[0];
+                                        let server = self.servers.filter(s => s.directory == folder_dir)[0];
                                         server.displayMessage(server.name + ' successfully added. type \".help\" for a list of commands!', null, false, true);
                                         self.click_element(server.tab);
                                     })
@@ -268,39 +256,24 @@ class ServerHandler extends ServerHelpers {
                 // display that server is being downloaded
                 self.display_overlay('Downloading: ' + name);
 
-                self.create_server_folder(self.nativeDir, name, function (err, data) {
+                // create folder then attempt to download server
+                self.create_server_folder(self.nativeDir, name, function (folder_dir) {
+                    download(url, { directory: folder_dir, filename: name }, function (err) {
 
-                    if (err) {
-                        self.hide_download_overlay();
-                        self.notifier.alert(err.toString());
-                        return;
-                    }
-
-                    if (data) {
-                        let f_dir = data['folderDir'];
-
-                        let options = {
-                            directory: f_dir,
-                            filename: name
-                        }
-
-                        download(url, options, function (err) {
-
-                            if (err) {
+                        if (err) {
+                            self.hide_overlay();
+                            self.notifier.alert(err.toString());
+                            return;
+                        } else {
+                            $('.modal').modal('hide');
+                            self.populate_servers(() => {
+                                let server = self.servers.filter(s => s.directory == folder_dir)[0];
+                                server.displayMessage(server.name + ' finished downloading. type \".help\" for a list of commands!', null, false, true);
+                                self.click_element(server.tab);
                                 self.hide_overlay();
-                                self.notifier.alert(err.toString());
-                                return;
-                            } else {
-                                $('.modal').modal('hide');
-                                self.populate_servers(() => {
-                                    let server = self.servers.filter(s => s.directory == f_dir)[0];
-                                    server.displayMessage(server.name + ' finished downloading. type \".help\" for a list of commands!', null, false, true);
-                                    self.click_element(server.tab);
-                                    self.hide_overlay();
-                                })
-                            }
-                        })
-                    }
+                            })
+                        }
+                    })
                 })
             })
         });
@@ -452,15 +425,25 @@ class ServerHandler extends ServerHelpers {
 
         this.removeAllChildNodes(this.server_dropdown_container);
         this.getFiles(this.nativeDir, false, (folders) => {
-            try {
-                folders.forEach(folder => {
-                    let directory = path.join(this.nativeDir, folder);
-                    let info = this.fileInfo(directory);
-                    if (info && info.isDirectory()) {
-                        let files = this.getFiles(directory);
-                        if(files) {
-                            files.forEach(server_file => {
+            folders.forEach(folder => {
+                let directory = path.join(this.nativeDir, folder);
+                let info = this.fileInfo(directory);
+                if (info && info.isDirectory()) {
+                    let files = this.getFiles(directory);
+                    if(files) {
+
+                        var BreakException = {};
+                        files.forEach(server_file => {
+
+                            try {   
                                 if (path.extname(server_file) === '.jar') {
+
+
+                                    // check that file has run.bat file
+                                    if(!files.includes('run.bat')) {
+                                        self.createBatFile(directory, server_file);
+                                    }
+
                                     let name = this.get_display_name(server_file);
                                     let server = this.servers.find((s) => { return s.directory == directory; });
                                     if (server === undefined) {
@@ -500,19 +483,19 @@ class ServerHandler extends ServerHelpers {
                                     } else {
                                         this.server_dropdown_container.append(server.tab);
                                     }
+
+                                    throw BreakException;
                                 }
-                            });   
-                        }
+                            } catch(err) {
+                                if(err !== BreakException) throw err;
+                            }
+                        });   
                     }
-                });
+                }
+            });
 
-                this.sort_servers();
-                if(callback) callback();
-
-            } catch(err) {
-                this.notifier.alert(err.toString());
-                console.log(err);
-            }
+            this.sort_servers();
+            if(callback) callback();
         })
     }
 

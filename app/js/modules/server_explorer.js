@@ -11,7 +11,7 @@ class ServerExplorer {
         this.handler = handler;
 
         let self = this;
-        this.allowedFiles = ['.txt', '.yml', '.json', '.properties', '.log'];
+        this.allowedFiles = ['.txt', '.yml', '.json', '.properties', '.log', '.bat'];
         this.excludedFiles = ['eula.txt'];
 
         this.baseDir = '';

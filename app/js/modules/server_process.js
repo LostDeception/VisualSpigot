@@ -41,10 +41,7 @@ class Server {
             '0': '#000000'
         }
 
-        // local server storage is for keeping ram/port
-        let folder_dir = path.join(this.file_directory, '../');
-        this.folder_name = path.basename(folder_dir);
-        this.setupServerLocalStorage(this.folder_name);
+        store.remove(this.folder_name);
     }
 
     /**
@@ -58,7 +55,6 @@ class Server {
         if(this.isActive) { callback('Server already started'); }
 
         this.isActive = true;
-        let info = this.getInfo();
 
         // when server is starting
         this.handler.updateServerState(this, 'starting');
@@ -66,24 +62,14 @@ class Server {
         this.displayMessage('Server Starting...', 'var(--lime)', false, true);
         this.handler.btn_dropdown_servers.innerHTML = this.tab.innerHTML;
 
-        let spawnArgs = [
-            '-Xmx'+ info.ram + 'G',
-            '-Dlog4j.skipJansi=true',
-            '-Dfile.encoding=utf8',
-            '-jar',
-            this.file_directory,
-            '-p', info.port,
-            'nogui',
-            'PAUSE'
-        ];
-
         let spawnOpts = {
             cwd: this.directory,
             stdio: ['pipe', 'pipe', 'inherit']
         }
 
         // spawn server process in its native directory
-        this.spawn = spawn("java", spawnArgs, spawnOpts);
+        let batDir = path.join(this.directory, 'run.bat')
+        this.spawn = spawn(batDir, spawnOpts);
 
         // server is starting EVENT
         this.handler.events.emit('server-starting');
@@ -192,39 +178,6 @@ class Server {
     isServerLoaded(line) {
         return line.indexOf('Done') > -1 && line.indexOf('help') > -1;
     }
-
-    // check if server as been setup in local storage (store api) if not than set it up
-    setupServerLocalStorage(folder_name) {
-        let server_obj = store.get(folder_name);
-
-        // check that obj is undefined
-        if(!server_obj) {
-            store.set(folder_name, {
-                port: 25565,
-                ram: 2
-            })
-        }
-    }
-    getInfo() {
-        return store.get(this.folder_name);
-    }
-    setRam(integer) {
-        if(integer > 0) {
-            let info_obj = store.get(this.folder_name);
-            info_obj.ram = integer;
-            store.set(this.folder_name, info_obj);
-            this.displayMessage(this.name + ' ram set to ' + integer, null, false, true);
-        } else {
-            this.displayMessage('Ram must be greater than 0', 'var(--red)', false, true)
-        }
-    }
-    setPort(integer) {
-        let info_obj = store.get(this.folder_name);
-        info_obj.port = integer;
-        store.set(this.folder_name, info_obj);
-        this.displayMessage(this.name + ' port set to ' + integer, null, false, true);
-    }
-
 
     // send command to server
     sendCommand(command, callback) {

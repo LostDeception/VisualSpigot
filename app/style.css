@@ -343,8 +343,8 @@ span {
 #server-information span {
   font-size: 12px;
   font-weight: 500;
-  width: 75px;
-  margin-left: 15px;
+  width: 80px;
+  margin-left: 10px;
   overflow: hidden;
   white-space: nowrap;
 }
