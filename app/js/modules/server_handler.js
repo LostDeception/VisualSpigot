@@ -9,7 +9,6 @@ const Events = require('@modules/events');
 const GlobalCommands = require('@modules/global_commands');
 const ServerHelpers = require('@modules/server_helpers');
 const ServerExplorer = require('@modules/server_explorer');
-const StatsRunnable = require('@modules/stats_runnable');
 
 class ServerHandler extends ServerHelpers {
     
@@ -29,9 +28,6 @@ class ServerHandler extends ServerHelpers {
 
         // handle file explorer functions
         this.sExplorer = new ServerExplorer(this);
-
-        // handle displaying server statistics to user as needed
-        this.sRunnable = new StatsRunnable(this);
 
         // handle global command functions
         this.gCommand = new GlobalCommands(this);
@@ -193,7 +189,7 @@ class ServerHandler extends ServerHelpers {
                     if (e.dataTransfer.types == "Files") {
                         self.create_server_folder(self.nativeDir, file.name, function (folder_dir) {
                             if (folder_dir) {
-                                let s_dir = path.join(f_dir, file.name);
+                                let s_dir = path.join(folder_dir, file.name);
 
                                 // -- copy dropped file to server folder
                                 fs.copyFile(file.path, s_dir, function (err) {
@@ -279,7 +275,6 @@ class ServerHandler extends ServerHelpers {
         });
     }
 
-
     /**
      * copy currently selected server files to 
      * new directory and re-populate servers
@@ -303,8 +298,11 @@ class ServerHandler extends ServerHelpers {
 
                                 // selecte cloned server and write some text :P
                                 let server = this.servers.filter(s => s.directory == destDir)[0];
-                                server.displayMessage('I am a clone :P');
-                                this.click_element(server.tab);
+
+                                if(server) {
+                                    server.displayMessage('I am a clone :P');
+                                    this.click_element(server.tab);
+                                }
                             })
                         })
                     } else {
@@ -356,12 +354,12 @@ class ServerHandler extends ServerHelpers {
 
                         self.server_access((server) => {
                             if (path.extname(file.name) == '.jar') {
+
+                                // create plugin folder
+                                self.createPluginFolder(server.directory);
+
                                 let pluginDir = path.join(server.directory, 'plugins');
                                 let destinDir = path.join(pluginDir, file.name);
-    
-                                if (!fs.existsSync(pluginDir)) {
-                                    fs.mkdirSync(pluginDir);
-                                }
     
                                 if (fs.existsSync(destinDir)) {
                                     fs.unlink(destinDir, () => {
@@ -420,77 +418,79 @@ class ServerHandler extends ServerHelpers {
      * -- create server
      */
     populate_servers(callback) {
-
         let self = this;
-
         this.removeAllChildNodes(this.server_dropdown_container);
         this.getFiles(this.nativeDir, false, (folders) => {
             folders.forEach(folder => {
-                let directory = path.join(this.nativeDir, folder);
-                let info = this.fileInfo(directory);
-                if (info && info.isDirectory()) {
-                    let files = this.getFiles(directory);
-                    if(files) {
-
-                        var BreakException = {};
-                        files.forEach(server_file => {
-
-                            try {   
-                                if (path.extname(server_file) === '.jar') {
-
-
-                                    // check that file has run.bat file
-                                    if(!files.includes('run.bat')) {
-                                        self.createBatFile(directory, server_file);
-                                    }
-
-                                    let name = this.get_display_name(server_file);
-                                    let server = this.servers.find((s) => { return s.directory == directory; });
-                                    if (server === undefined) {
-
-                                        let server_console = this.create_server_console();
-                                        let server_tab = this.create_tab_item(name);
-
-                                        let server = new Server(this, {
-                                            name: name,
-                                            dir: directory,
-                                            file: server_file,
-                                            state: 'default',
-                                            tab: server_tab,
-                                            console: server_console
-                                        })
-
-                                        // when user clicks server button
-                                        server.tab.addEventListener('click', () => {
-                                            if (!server.isSelected) {
-
-                                                // set the selected server and replace console
-                                                self.setSelectedServer(server);
-
-                                                // display main container if not already displayed
-                                                self.updateServerState(server);
-
-                                                // set off event for server swap
-                                                self.events.emit('server-swap');
-                                            }
-                        
-                                            // focus server console input on server selection
-                                            self.console_input.focus();
-                                        })
-
-                                        this.servers.push(server);
-
-                                    } else {
-                                        this.server_dropdown_container.append(server.tab);
-                                    }
-
-                                    throw BreakException;
+                try {
+                    let directory = path.join(this.nativeDir, folder);
+                    let info = this.fileInfo(directory);
+                    if (info && info.isDirectory()) {
+                        let files = this.getFiles(directory);
+                        if(files) {
+    
+                            // filter array of files for .jar and .bat file
+                            let jarFile = this.searchArray(files, '.jar');
+                            let batFile = this.searchArray(files, 'run.bat');
+                            
+                            // if files contain .jar file
+                            if(jarFile) {
+                                
+                                // check if vsc plugin exists and if not copy it
+                                self.copyVSCPlugin(directory);
+    
+                                // if server directory does not contain run.bat file create it
+                                if(!batFile) {
+                                    self.createBatFile(directory, jarFile);
+                                } else {
+                                    // check the run.bat to be sure the .jar name and required args are passed
+                                    self.processBatFile(directory, jarFile);
                                 }
-                            } catch(err) {
-                                if(err !== BreakException) throw err;
+    
+                                let server_name = this.get_display_name(jarFile);
+                                let server = this.servers.find((s) => { return s.directory == directory; });
+
+                                if (server === undefined) {
+                                    let server_console = this.create_server_console();
+                                    let server_tab = this.create_tab_item(server_name);
+
+                                    let server = new Server(this, {
+                                        name: server_name,
+                                        dir: directory,
+                                        file: jarFile,
+                                        state: 'default',
+                                        tab: server_tab,
+                                        console: server_console
+                                    })
+    
+                                    // when user clicks server button
+                                    server.tab.addEventListener('click', () => {
+                                        if (!server.isSelected) {
+    
+                                            // set the selected server and replace console
+                                            self.setSelectedServer(server);
+    
+                                            // display main container if not already displayed
+                                            self.updateServerState(server);
+                                        }
+                    
+                                        // focus server console input on server selection
+                                        self.console_input.focus();
+                                    })
+    
+                                    this.servers.push(server);
+    
+                                } else {
+                                    this.server_dropdown_container.append(server.tab);
+                                }
+                            } else {
+                                this.deleteFile(directory);
                             }
-                        });   
+                        }
                     }
+                } catch(err) {
+                    this.notifier.alert(err.toString());
+                    console.log(err);
                 }
             });
 
@@ -551,25 +551,21 @@ class ServerHandler extends ServerHelpers {
 
         let onOk = () => {
             self.server_access(async (server) => {
+                server.stop().then(() => {
+                    let sIndex = self.servers.indexOf(server);
 
-                if (server.isActive) {
-                    await server.stop();
-                }
+                    if (sIndex > -1) {
+                        self.servers.splice(sIndex, 1)
+                    }
 
-                let sIndex = self.servers.indexOf(server);
-
-                if (sIndex > -1) {
-                    self.servers.splice(sIndex, 1)
-                }
-
-                self.deleteFile(server.directory, () => {
-                    self.setSelectedServer(null);
-                    self.console_container.innerHTML = '';
-                    self.populate_servers();
-                    self.updateServerState(server, 'waiting');
-                    self.btn_dropdown_servers.innerHTML = 'Select A Server';
-                    self.hideServerInfo();
-                    self.app_intro_state();
+                    self.deleteFile(server.directory, () => {
+                        self.setSelectedServer(null);
+                        self.console_container.innerHTML = '';
+                        self.populate_servers();
+                        self.updateServerState(server, 'waiting');
+                        self.btn_dropdown_servers.innerHTML = 'Select A Server';
+                        self.app_intro_state();
+                    })   
                 })
             })
         };

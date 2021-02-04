@@ -5,6 +5,7 @@ var fs = require('fs-extra');
 var path = require('path');
 var store = require('store');
 var rmdir = require('rimraf');
+const { ipcRenderer } = require('electron');
 
 class DomHandler {
     constructor() {
@@ -21,6 +22,12 @@ class DomHandler {
 
         this.main_container = document.getElementById('main-container');
         this.logo_container = document.getElementById('logo-container');
+
+        // setup donation button click event
+        let btn_donate = document.getElementById('btn-paypal-donation');
+        btn_donate.addEventListener('click', function() {
+            ipcRenderer.send('open-donation-window');
+        })
 
         // server console elements
         this.console = document.getElementById('console');
@@ -320,20 +327,6 @@ class DomHandler {
             parentNode.scrollTop = parentNode.scrollHeight;
         }
     }
-
-    displayServerInfo() {
-        var container = document.getElementById('server-information');
-        if(!container.style.display || container.style.display == 'none') {
-            container.style.display = 'flex';
-        }
-    }
-
-    hideServerInfo() {
-        var container = document.getElementById('server-information');
-        if(container.style.display || container.style.display == 'flex') {
-            container.style.display = 'none';
-        }
-    }
 }
 
 class ServerHelpers extends DomHandler {
@@ -363,7 +356,7 @@ class ServerHelpers extends DomHandler {
 
         // set visual defaults
         this.servers.forEach(s => {
-            $(s.console).css('font-family', gui.font);
+            $(s.console).find('*').css('font-family', gui.font);
             $(s.console).css('font-size', gui.fontsize);
             $(s.console).css('color', gui.fontcolor);
         })
@@ -420,6 +413,7 @@ class ServerHelpers extends DomHandler {
             store.set('gui', obj);
         }
     }
+
 
     // manage selected currently selected server
     getSelectedServer() {
@@ -524,8 +518,35 @@ class ServerHelpers extends DomHandler {
                 return;
             }
 
-            callback();
+            if(callback) {
+                callback();
+            }
         })
+    }
+
+    // check that .bat file command has required args
+    processBatFile(dir, file) {
+        let changeDetected = false;
+        let p = path.join(dir, 'run.bat');
+        let command = fs.readFileSync(p, 'utf-8');
+
+        // check that .jar matches file name
+        let a = command.indexOf('.jar');
+        let b = command.substr(0, a);
+        let c = b.lastIndexOf(' ');
+        let d = b.substr(c);
+        if(d !== file) {
+            changeDetected = true;
+            command = b.substr(0, c).concat(' ' + file).concat(command.substr(a + 4));
+        }
+
+        let args = command.split(' ');
+
+        // if there is a change detected
+        if(changeDetected) {
+            let newCommand = args.join(' ');
+            fs.writeFileSync(p, newCommand);
+        }
     }
 
     // create eula.txt file which is required to run the server
@@ -572,6 +593,42 @@ class ServerHelpers extends DomHandler {
             })
     }
 
+    // create plugin folder
+    createPluginFolder(dir) {
+        let pluginDir = path.join(dir, 'plugins');
+        if (!fs.existsSync(pluginDir)) {
+            fs.mkdirSync(pluginDir);
+        }
+    }
+
+    // if vsc plugin does not exist than copy from resource folder
+    copyVSCPlugin(dir) {
+
+        // first create plugin folder if needed
+        this.createPluginFolder(dir);
+
+        // OLD VERSION TO REPLACE
+        /**
+            let old = path.join(dir, 'plugins', 'vsc.jar');
+            if(fs.existsSync(old)) {
+                this.deleteFile(old);
+            }
+        */
+
+        // get path to vsc.jar
+        let to = path.join(dir, 'plugins', 'vsc-v1.0.8.jar');
+        
+        if(!fs.existsSync(to)) {
+            let from = path.join(process.resourcesPath, 'plugins', 'vsc-v1.0.8.jar');
+            fs.copy(from, to, err => {
+                if(err) {
+                    this.notifier.alert(err.toString());
+                    console.log(err);
+                }
+            })
+        }
+    }
+
     /**
      * if there is an error creating a server
      * remove all pre-existing files related to the server
@@ -582,6 +639,11 @@ class ServerHelpers extends DomHandler {
             this.notifier.alert(err.toString());
             console.log(err);
         })
+    }
+
+    // search array for value and return it
+    searchArray(array, searchString) {
+        return array.filter(f => f.includes(searchString))[0];
     }
 
 
@@ -719,7 +781,9 @@ class ServerHelpers extends DomHandler {
                         console.log(err);
                         return;
                     } else {
-                        callback();
+                        if(callback) {
+                            callback();
+                        }
                     }
                 });
             } else {
@@ -729,7 +793,9 @@ class ServerHelpers extends DomHandler {
                         console.log(err);
                         return;
                     } else {
-                        callback();
+                        if(callback) {
+                            callback();
+                        }
                     }
                 })
             }

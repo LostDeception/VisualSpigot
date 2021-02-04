@@ -1,7 +1,7 @@
 // =========================================================
 // Copyright 2021, Timothy Mickelson, All rights reserved.
 // =========================================================
-const { app, BrowserWindow, Menu, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, Menu, ipcMain, dialog, globalShortcut } = require('electron');
 const { autoUpdater } = require("electron-updater");
 const url = require('url');
 var path = require('path');
@@ -23,10 +23,10 @@ if (!gotTheLock) {
       }
     })
   
-    async function createWindow() {
+    async function createWindow(url, isMain) {
 
-        // -- create the browser window
-        win = new BrowserWindow({
+        // window options
+        let options = {
             show: false,
             minWidth: 1000,
             minHeight: 650,
@@ -34,23 +34,29 @@ if (!gotTheLock) {
             webPreferences: {
                 nodeIntegration: true
             }
-        })
+        };
 
-        // get app cache size.. if cache is greater than 10000mb clear
-        let result = await win.webContents.session.getCacheSize();
-        if(result > 10000) {
-            await win.webContents.session.clearCache();
+        if(isMain) {
+            // -- create the browser window
+            win = new BrowserWindow(options);
+
+            // get app cache size.. if cache is greater than 100000 bytes clear
+            let result = await win.webContents.session.getCacheSize();
+            if(result > 1000000) {
+                await win.webContents.session.clearCache();
+            }
+
+            // open dev panel
+            //win.webContents.openDevTools();
+
+            // load html file in browserwindow
+            win.loadURL(url)
+
+        } else {
+            var newWin = new BrowserWindow(options);
+            newWin.loadURL(url);
+            newWin.show();
         }
-
-        // open dev panel
-        win.webContents.openDevTools();
-    
-        // load html file in browserwindow
-        win.loadURL(url.format({
-            pathname: path.join(__dirname, '../index.html'),
-            protocol: 'file:', 
-            slashes: true
-        }))
     }
     
     app.on('window-all-closed', function(){
@@ -69,7 +75,11 @@ if (!gotTheLock) {
             autoUpdater.checkForUpdates();
     
             // create main window
-            await createWindow();
+            await createWindow(url.format({
+                pathname: path.join(__dirname, '../index.html'),
+                protocol: 'file:', 
+                slashes: true
+            }), true);
     
             // when DOM finished loading display window
             win.once('ready-to-show', function() {
@@ -78,10 +88,9 @@ if (!gotTheLock) {
     
             // continue to handle mainWindow "close" event here
             win.on('close', function(e){
-                if(!force_quit){
+                if(!force_quit) {
                     e.preventDefault();
-                    //win.hide();
-    
+
                     // handle any tasks before application exit
                     win.webContents.send("renderAppClose");
                 }
@@ -91,6 +100,10 @@ if (!gotTheLock) {
             ipcMain.on('mainAppClose', function() {
                 force_quit=true; 
                 app.quit();
+            })
+
+            ipcMain.on('open-donation-window', function() {
+                createWindow("https://www.paypal.com/donate?business=tmickelson93%40gmail.com&item_name=VisualSpigot+Donations&currency_code=USD", false);
             })
         })
     })

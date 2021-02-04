@@ -3,6 +3,7 @@
 // =========================================================
 var fs = require('fs-extra');
 var path = require('path');
+var store = require('store');
 const { shell } = require('electron');
 
 // handle the local and remove file explorer
@@ -12,13 +13,18 @@ class ServerExplorer {
 
         let self = this;
         this.allowedFiles = ['.txt', '.yml', '.json', '.properties', '.log', '.bat'];
-        this.excludedFiles = ['eula.txt'];
+        this.excludedFiles = ['eula.txt', 'vsc-v1.0.8.jar'];
 
         this.baseDir = '';
         this.currentDir = '';
 
         // hold codemirror object
         this.editor = null;
+
+        // set default editor theme
+        if(!store.get('editor-theme')) {
+            store.set('editor-theme', 'darcula');
+        }
 
         // navigates back a directory
         this.handler.btn_back_dir.addEventListener('click', function() {
@@ -43,9 +49,9 @@ class ServerExplorer {
         let savingFile = false;
         this.handler.btn_save_file.addEventListener('click', function() {
             if(!savingFile) {
-                savingFile = true;
                 let data = self.editor.getValue();
-                if(data != undefined) {
+                if(data != undefined && data != '') {
+                    savingFile = true;
                     self.handler.save_file_notif.style.display = 'none';
                     fs.writeFile(self.currentDir, data, (err) => {
                         if(err) {
@@ -60,6 +66,47 @@ class ServerExplorer {
                 }
             }
         })
+
+        // add listener to theme buttons
+        this.editorThemes = document.getElementById('editor-theme');
+        let btnTheme = document.getElementById('btn-dropdown-themes');
+        let themeDrop = document.getElementById('dropdown-themes');
+        let allThemeButtons = Array.from(themeDrop.childNodes);
+        allThemeButtons.forEach(btn => {
+
+            // set selected tab-item border
+            if(btn.textContent == store.get('editor-theme')) {
+                btn.style.color = 'rgb(209, 209, 214)';
+                btn.style.backgroundColor = 'rgba(72, 76, 82, 0.87)';
+                btnTheme.innerHTML = 'Theme (' + btn.textContent + ')';
+            }
+
+            btn.addEventListener('click', function() {
+
+                let btnText = btn.textContent;
+                
+                // reset colors of all tab_items
+                allThemeButtons.forEach(element => {
+                    element.style.color = 'rgba(255, 255, 255, 0.5)';
+                    element.style.backgroundColor = 'transparent';
+                });
+
+                // set selected tab-item border
+                btn.style.color = 'rgb(209, 209, 214)';
+                btn.style.backgroundColor = 'rgba(72, 76, 82, 0.87)';
+
+                // set selected item in main dropdown button
+                btnTheme.innerHTML = 'Theme (' + btnText + ')';
+
+                // set new editor theme to be stored
+                store.set('editor-theme', btnText);
+
+                // re-generate file with theme
+                self.generateFileList(self.currentDir);
+            })
+        })
+
+        
     }
 
     /**
@@ -101,6 +148,9 @@ class ServerExplorer {
 
                         // elements to hide when inside directory
                         this.handler.btn_save_file.style.display = 'none';
+
+                        // hide code editor theme dropdown
+                        this.editorThemes.style.display = 'none';
 
                         // elements to display when inside directory
                         this.handler.input_file_search.style.display = 'block';
@@ -153,6 +203,9 @@ class ServerExplorer {
 
                                             // display different icons for different file types
                                             switch(fileExt) {
+                                                case '.bat':
+                                                    btnIcon = '<i class="fas fa-file-alt"></i> ';
+                                                    break;
                                                 case '.txt':
                                                     btnIcon = '<i class="fas fa-file-alt"></i> ';
                                                     break;
@@ -252,6 +305,9 @@ class ServerExplorer {
             // elements to hide while inside file
             this.handler.input_file_search.style.display = 'none';
 
+            // display code editor theme dropdown
+            this.editorThemes.style.display = 'block';
+
             // set the current directory to the file path given
             this.currentDir = filePath;
 
@@ -276,7 +332,7 @@ class ServerExplorer {
                 self.editor = CodeMirror.fromTextArea(content, {
                     mode: "yaml",
                     lineNumbers: true,
-                    theme: "darcula",
+                    theme: store.get('editor-theme'),
                     cursorHeight: 0.85,
                     extraKeys: {
                         "Ctrl-S": function(instance) {

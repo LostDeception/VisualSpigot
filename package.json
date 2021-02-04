@@ -1,6 +1,6 @@
 {
   "name": "VisualSpigot",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "",
   "main": "app/js/main.js",
   "scripts": {
@@ -16,7 +16,10 @@
       "publish": [
         "github"
       ]
-    }
+    },
+    "extraResources": [
+      "./plugins/**"
+    ]
   },
   "repository": {
     "type": "git",
@@ -29,7 +32,6 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.2",
-    "@gristlabs/pidusage": "^2.0.17",
     "animate.css": "^4.1.1",
     "awesome-notifications": "^3.1.1",
     "bootstrap": "^4.5.3",
@@ -38,6 +40,7 @@
     "electron-updater": "^4.3.5",
     "fs-extra": "^9.1.0",
     "jquery": "^3.5.1",
+    "mcmotdparser": "^1.2.3",
     "minecraft-data": "^2.72.0",
     "module-alias": "^2.2.2",
     "popper.js": "^1.16.1",

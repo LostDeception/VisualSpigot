@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
     // -- listen to main process for 'close' event
     ipcRenderer.on('renderAppClose', function() {
-
+        
         // -- close all servers then close application
         handler.close_servers(() => {
             this.send('mainAppClose');

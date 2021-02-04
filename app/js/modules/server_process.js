@@ -3,7 +3,7 @@
 // =========================================================
 var path = require('path');
 var store = require('store');
-var pidusage = require('@gristlabs/pidusage');
+const motdparser = require('@modules/motd_parser');
 const { exec, spawn } = require('child_process');
 
 class Server {
@@ -22,25 +22,7 @@ class Server {
         this.isSelected = false;
         this.isActive = false;
         this.prefix = RegExp('\\[\\d+\\:\\d+\\:\\d+.*'); // default prefix before console message
-        this.minecraft_color_codes = { // default minecraft color codes to display in console
-            '4': '#AA0000',
-            'c': '#FF5555',
-            '6': '#FFAA00',
-            'e': '#FFFF55',
-            '2': '#00AA00',
-            'a': '#55FF55',
-            'b': '#55FFFF',
-            '3': '#00AAAA',
-            '1': '#0000AA',
-            '9': '#5555FF',
-            'd': '#FF55FF',
-            '5': '#AA00AA',
-            'f': '#FFFFFF',
-            '7': '#AAAAAA',
-            '8': '#555555',
-            '0': '#000000'
-        }
-
+        
         store.remove(this.folder_name);
     }
 
@@ -49,7 +31,7 @@ class Server {
      * spawn server child process and listen for response
      * return process response to server_response emitter
      */
-    start(callback) {
+    async start(callback) {
         
         // reject server start if already active
         if(this.isActive) { callback('Server already started'); }
@@ -68,69 +50,26 @@ class Server {
         }
 
         // spawn server process in its native directory
-        let batDir = path.join(this.directory, 'run.bat')
+        let batDir = path.join(this.directory, 'run.bat');
         this.spawn = spawn(batDir, spawnOpts);
 
-        // server is starting EVENT
-        this.handler.events.emit('server-starting');
-
         // get and display server output to console
+        this.startRecording = false;
+        this.spawn.stdout.setEncoding('utf8');
         this.spawn.stdout.on('data', (data) => {
-            data.toString().split('\n').forEach((line) => { 
-                if(line) {
-
-                    // check if there is an error or if in the middle of a stacktrace
-                    if(this.errorFound || this.isError(line)) {
-                        this.errorFound = true;
-                        
-                        // check if end of stacktrace set error found to false
-                        if(this.isInfo(line) || this.isWarning(line)) {
-                            this.errorFound = false;
-                        } else {
-                            this.displayMessage(line, 'var(--red)', true, false);
-                        }
-                    }
-    
-                    // if there are no errors being printed in the console
-                    if(!this.errorFound) {
-                        if(this.isWarning(line)) {
-                            this.displayMessage(line, 'var(--yellow)', true, false);
-                        } else {
-                            this.displayMessage(line, null, true, false);
-    
-                            // check if server is finished loading
-                            if(!this.serverLoaded && this.isServerLoaded(line)) {
-                                this.handler.updateServerState(this, 'running');
-                                this.serverLoaded = true;
-                            }
-                        }
-                    }
-                }
-            })
-
-            // scroll to bottom of console
-            this.handler.scrollToBottom(this.console);
-        })
+            this.handleConsoleData(data);
+        });
 
         // wait for stdio to close
         this.spawn.once('exit', () => {
-            this.serverLoaded = false;
-            this.isActive = false;
-            this.spawn = null;
-            
-            if (this.state == 'restarting') {
-                this.handler.updateServerState(this, 'waiting');
-            } else {
-                this.handler.updateServerState(this, 'default');
-            }
-
-            this.tab.childNodes[0].style.color = 'rgba(255, 255, 255, 0.5)';
-
-            if(this.handler.isSelectedServer(this)) {
-                this.handler.btn_dropdown_servers.innerHTML = this.tab.innerHTML;
-            }
-
+            this.resetServer();
             this.displayMessage('Server Terminated', 'var(--red)', false, true);
+        });
+
+        // get if process fails to start
+        this.spawn.on('error', () => {
+            this.resetServer();
+            this.displayMessage('Failed to start server', 'var(--red)', false, true);
         });
     }
 
@@ -138,7 +77,7 @@ class Server {
         return new Promise((resolve, reject) => {
             // -- check if server is already not active
             if(!this.isActive) {
-                reject("Server is not running!");
+                resolve("Server is not running!");
             }
 
             // -- kill main server process and all child processes
@@ -160,12 +99,63 @@ class Server {
         }, 100);
     }
 
-    // displays/updates server process information
-    serverProcessData() {
-        return pidusage(this.spawn.pid);
-    }
+    /**
+     * get data line by line and
+     * check for vsc commands. If not a command
+     * print the line to the console.
+     * @param {*} data
+     */
+    handleConsoleData(data) {
+        let text = data.trim();
+        text.split('\n').forEach((line) => { 
+            if(line) {
+                // check if data is global-command
+                if(line.indexOf('/.') > -1) {
+                    let index = line.lastIndexOf('.');
+                    let command = line.substring(index);
+                    this.handler.gCommand.newGlobalCommand(command);
+                    return;
+                }
 
-    // check for error,warning or info
+
+                if(!this.startRecording) {
+                    if(line.indexOf('C:\\')) {
+                        this.startRecording = true;
+                    }
+                } else {
+                    // check if there is an error or if in the middle of a stacktrace
+                    if(this.errorFound || this.isError(line)) {
+                        this.errorFound = true;
+                        
+                        // check if end of stacktrace set error found to false
+                        if(this.isInfo(line) || this.isWarning(line)) {
+                            this.errorFound = false;
+                        } else {
+                            this.displayMessage(line, 'var(--red)', true, false);
+                        }
+                    }
+
+                    // if there are no errors being printed in the console
+                    if(!this.errorFound) {
+                        if(this.isWarning(line)) {
+                            this.displayMessage(line, 'var(--yellow)', true, false);
+                        } else {
+                            this.displayMessage(line, null, true, false);
+
+                            // check if server is finished loading
+                            if(!this.serverLoaded && this.isServerLoaded(line)) {
+                                this.handler.updateServerState(this, 'running');
+                                this.serverLoaded = true;
+                            }
+                        }
+                    } 
+                }  
+            }
+        })
+
+        // scroll to bottom of console
+        this.handler.scrollToBottom(this.console);
+    }
     isWarning(line) {
         return line.indexOf('WARN') > -1;
     }
@@ -203,6 +193,9 @@ class Server {
     // display message in server console
     displayMessage(message, color, hidePrefix, autoScroll) {
 
+        // add new line to message 
+        message = message.concat('\n');
+
         // check if message requires prefix
         if(!hidePrefix) {
             if(!this.prefix.test(message)) {
@@ -211,10 +204,8 @@ class Server {
                 let minute = ('0' + d.getMinutes()).slice(-2);
                 let second = ('0' + d.getSeconds()).slice(-2);
                 let m_prefix = '['+hour+':'+minute+':'+second+']: ';
-                message = m_prefix.concat(message + '\n');
+                message = m_prefix.concat(message);
             }
-        } else if(hidePrefix) {
-            message = message.concat('\n');
         }
 
         // check if message is colored
@@ -225,12 +216,41 @@ class Server {
             this.console.append(span);
             span.style.fontFamily = this.console.style.fontFamily;
         } else {
-            let text = document.createTextNode(message);
-            this.console.append(text);
+
+            // check if message contains color codes
+            if(message.indexOf('&') > -1) {
+                message = message.replaceAll('&', '§');
+                motdparser.toHtml(message, (err, res) => {
+                    this.console.innerHTML += res;
+                });
+    
+            } else {
+                let text = document.createTextNode(message);
+                this.console.append(text);
+            }
         }
 
         if(autoScroll) {
             this.handler.scrollToBottom(this.console);
+        }
+    }
+
+    /**
+     * if there is an error or is restarting 
+     * go ahead and reset the server
+     */
+    resetServer() {
+        this.serverLoaded = false;
+        this.isActive = false;
+        this.spawn = null;
+        if (this.state == 'restarting') {
+            this.handler.updateServerState(this, 'waiting');
+        } else {
+            this.handler.updateServerState(this, 'default');
+        }
+        this.tab.childNodes[0].style.color = 'rgba(255, 255, 255, 0.5)';
+        if(this.handler.isSelectedServer(this)) {
+            this.handler.btn_dropdown_servers.innerHTML = this.tab.innerHTML;
         }
     }
 }

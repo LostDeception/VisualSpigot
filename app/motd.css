@@ -1,0 +1,76 @@
+.mc_black {
+  color: black !important;
+}
+.mc_dark_blue {
+  color: #0000aa !important;
+}
+.mc_dark_green {
+  color: #00aa00 !important;
+}
+.mc_dark_aqua {
+  color: #00aaaa !important;
+}
+.mc_dark_red {
+  color: #aa0000 !important;
+}
+.mc_dark_purple {
+  color: #aa00aa !important;
+}
+.mc_gold {
+  color: #ffaa00 !important;
+}
+.mc_gray {
+  color: #aaaaaa !important;
+}
+.mc_dark_gray {
+  color: #555555 !important;
+}
+.mc_blue {
+  color: #5555ff !important;
+}
+.mc_green {
+  color: #55ff55 !important;
+}
+.mc_aqua {
+  color: #55ffff !important;
+}
+.mc_red {
+  color: #ff5555 !important;
+}
+.mc_light_purple {
+  color: #ff55ff !important;
+}
+.mc_yellow {
+  color: #ffff55 !important;
+}
+.mc_white {
+  color: white !important;
+}
+.mc_bold {
+  font-weight: bold !important;
+}
+.mc_italic {
+  font-style: italic !important;
+}
+.mc_strikethrough,
+.mc_underlined {
+  position: relative !important;
+  display: inline-block !important;
+}
+.mc_strikethrough::before,
+.mc_underlined::after {
+  content: "" !important;
+  width: 100% !important;
+  position: absolute !important;
+  right: 0 !important;
+}
+.mc_strikethrough::before {
+  border-bottom: 2px solid !important;
+  border-bottom-color: inherit !important;
+  top: 55% !important;
+}
+.mc_underlined::after {
+  border-bottom: 2px solid !important;
+  border-bottom-color: inherit !important;
+  bottom: -8% !important;
+}

@@ -3,13 +3,14 @@
 // =========================================================
 var fs = require('fs-extra');
 var path = require('path');
-var store = require('store');
 const { shell } = require('electron');
+const { ipcRenderer } = require('electron');
 
 class GlobalCommands {
     constructor(handler) {
         this.handler = handler;
         this.input_auto_completion({
+            '.donate': [],
             '.help': [],
             '.info': [],
             '.rename': [],
@@ -23,8 +24,7 @@ class GlobalCommands {
             '.clear': [],
             '.font': ['serif', 'cursive', 'monospace', 'comic sans'],
             '.fontsize': ['14', '15', '16', '17', '18'],
-            '.fontcolor': ['darkseagreen', 'darkkhaki', 'darkcyan', 'lightblue', 'lightslategrey', 'lightsteelblue'],
-            '.toggle': ['stats'],
+            '.fontcolor': ['darkseagreen', 'darkkhaki', 'darkcyan', 'lightblue', 'lightslategrey', 'lightsteelblue']
         });
     }
 
@@ -37,6 +37,10 @@ class GlobalCommands {
         let server = this.handler.getSelectedServer();
 
         switch(args[0]) {
+
+            case 'donate':
+                ipcRenderer.send('open-donation-window');
+                break;
 
             // display list of global commands
             case 'help':
@@ -62,13 +66,7 @@ class GlobalCommands {
                 ".clear: clear server console");
                 break;
             case 'info':
-                let info = server.getInfo();
-                this.handler.displayBlock(server.console, 
-                    '<i class="fas fa-server"></i>', 
-                    server.name + " Info",
-                    "Ram: " + info.ram + " Gigabytes\n" +
-                    "Port: " + info.port
-                );
+                server.sendCommand('.info');
                 break;
 
             // start, stop, kill and restart selected server
@@ -133,6 +131,7 @@ class GlobalCommands {
     
                                 // set new server name
                                 server.name = displayName;
+                                server.file = name;
 
                                 // set new full server.jar path
                                 server.file_directory = newPath;
@@ -141,6 +140,7 @@ class GlobalCommands {
                                 server.tab.innerHTML = '<i class="fas fa-circle"></i> ' + displayName;
                                 this.handler.sort_servers();
                                 this.handler.click_element(server.tab);
+                                this.handler.processBatFile(server.directory, server.file);
                             })
                         } else {
                             server.displayMessage('Server name cannot include spaces', 'var(--red');
@@ -187,31 +187,6 @@ class GlobalCommands {
             case 'fontcolor':
                 let value = args.slice(1).join(' ');
                 this.handler.updateVisuals(args[0], value);
-                break;
-            
-            case 'toggle':
-                switch(args[1]) {
-                    case 'stats':
-                        let stats = this.handler.sRunnable;
-                        let canDisplay = store.get('toggle-stats');
-                        if(canDisplay) {
-                            store.set('toggle-stats', false);
-                            this.handler.hideServerInfo();
-                            
-                            server.displayMessage('Server stats toggle=FALSE (will NOT display when server is active)', null, false, true);
-                            stats.stop();
-                        } else {
-
-                            store.set('toggle-stats', true);
-                            server.displayMessage('Server stats toggle=TRUE (will display when server is active)', null, false, true)
-
-                            if(server.isActive) {
-                                this.handler.displayServerInfo();
-                                stats.start();
-                            }
-                        }
-                        break;
-                }
                 break;
         }
     }
@@ -310,6 +285,9 @@ class GlobalCommands {
                         // -- set container suggestions
                         for(var i = 0; i < suggestions.length; i++) {
                             let item = doc.createElement('div');
+                            if(suggestions[i] == '.donate') {
+                                item.style.color = 'gold';
+                            }
                             item.innerHTML = suggestions[i];
                             container.append(item);
 

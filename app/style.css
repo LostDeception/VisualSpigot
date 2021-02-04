@@ -20,11 +20,6 @@
   --orange: rgb(255, 191, 52);
 }
 
-* {
-  box-sizing: border-box;
-  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
-}
-
 html,
 body {
   width: auto;
@@ -47,7 +42,8 @@ textarea::selection {
 button {
   font-size: 14px;
   font-weight: 600;
-  color: var(--white);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+  color: var(--dim-white);
 }
 button,
 button:focus,
@@ -119,6 +115,11 @@ em {
 span {
   margin: 0;
   padding: 0;
+}
+
+li {
+  font-weight: 500;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
 }
 
 .background {
@@ -211,6 +212,7 @@ span {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  border-right: 1px solid var(--darker-grey) !important;
 }
 #container-header-end {
   height: 39px;
@@ -285,7 +287,7 @@ span {
   position: relative;
   display: inline-block;
   transition: background-color 0.5s ease-out;
-  border-right: 1px solid var(--darker-grey) !important;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 .custom-dropdown:hover {
   cursor: pointer;
@@ -298,12 +300,12 @@ span {
   display: none;
   position: absolute;
   min-width: 200px;
-  max-height: 322px;
+  max-height: 325px;
   white-space: nowrap;
   box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.397);
   background-color: rgb(24, 24, 26);
   overflow-y: auto;
-  z-index: 5;
+  z-index: 1000;
 }
 .dropdown-content a {
   display: block;
@@ -321,34 +323,6 @@ span {
   margin-bottom: 5px !important;
 }
 
-/* server information */
-#server-information {
-  width: 255px;
-  height: 28px;
-  color: var(--dim-white);
-  background-color: rgba(24, 27, 29, 0.95);
-  border-radius: 0 0 0 3px;
-  position: absolute;
-  top: 40px;
-  right: 0px;
-  display: none;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  user-select: none;
-  z-index: 1;
-
-  animation-duration: 1s;
-}
-#server-information span {
-  font-size: 12px;
-  font-weight: 500;
-  width: 80px;
-  margin-left: 10px;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
 /* server container console */
 .server-console {
   /* setting column-reverse keeps scroll bar pinned to bottom */
@@ -363,7 +337,6 @@ span {
   word-wrap: break-word;
   line-height: normal;
   font-family: monospace;
-
   animation: fadeIn;
   animation-duration: 1s;
 }
@@ -472,10 +445,6 @@ span {
   border-bottom: none !important;
   background-color: rgba(17, 20, 22, 0.5) !important;
 }
-#add-server-tabs,
-#manual-tab {
-  border-radius: 5px 0px 0px 0px !important;
-}
 
 /* ADD SERVER MODAL STYLES */
 #file-drop-container {
@@ -486,13 +455,13 @@ span {
   align-items: center;
   background-color: rgba(17, 20, 22, 0.5);
   border: 1px solid transparent;
-  border-radius: 2px;
 }
 #add-server-container {
   min-width: 650px;
 }
 #add-server-content {
   min-height: 375px;
+  border-radius: 1px !important;
 }
 .add-server-list {
   height: 375px;
@@ -608,7 +577,7 @@ span {
   opacity: 0;
   position: absolute;
   right: -40px;
-  top: 5px;
+  top: 8px;
   font-size: 13px;
   color: var(--lime);
 }
@@ -626,9 +595,7 @@ span {
   background-color: rgb(44, 47, 51) !important;
   user-select: none;
 }
-.modal-backdrop {
-  opacity: 0.3 !important;
-}
+
 .modal-header {
   height: 45px;
   justify-content: center;
@@ -675,15 +642,14 @@ span {
 /* CODE MIRROR STYLES */
 .CodeMirror {
   height: 100% !important;
-  font-size: 18px !important;
-  font-family: monospace !important;
+  font-size: 16px !important;
   background-color: transparent !important;
+}
+.CodeMirror-linenumber {
+  color: var(--dim-grey) !important;
 }
 .CodeMirror-linenumbers {
   background-color: var(--dark-grey) !important;
-}
-.CodeMirror-selected {
-  background-color: var(--medium-grey) !important;
 }
 
 /* CUSTOM POPUP NOTIFICATION STYLES */
@@ -738,4 +704,17 @@ span {
     display: block;
     opacity: 1;
   }
+}
+
+/* PAYPAL STYLES */
+#btn-paypal-donation {
+  height: 35px;
+  position: absolute;
+  bottom: 5px;
+  left: 5px;
+  color: var(--bright-white);
+  background-color: rgba(0, 238, 255, 0.5);
+  border-radius: 3px;
+  animation: fadeIn;
+  animation-duration: 2s;
 }
