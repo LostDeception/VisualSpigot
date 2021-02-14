@@ -3,6 +3,7 @@
 // =========================================================
 var path = require('path');
 var store = require('store');
+var pidtree = require('pidtree')
 const motdparser = require('@modules/motd_parser');
 const { exec, spawn } = require('child_process');
 
@@ -80,9 +81,12 @@ class Server {
                 resolve("Server is not running!");
             }
 
-            // -- kill main server process and all child processes
-            exec('taskkill /pid ' + this.spawn.pid + ' /T /F', function(err, data) {
-                if(err) { reject(err); }
+            pidtree(this.spawn.pid, function(err, pids) {
+                pids.forEach(pid => {
+                    exec('taskkill /pid ' + pid + ' /T /F', function(err, data) {
+                        if(err) { reject(err); }
+                    })
+                })
             })
 
             this.spawn = null;

@@ -4,13 +4,14 @@
 var fs = require('fs-extra');
 var path = require('path');
 const { shell } = require('electron');
-const { ipcRenderer } = require('electron');
 
 class GlobalCommands {
     constructor(handler) {
         this.handler = handler;
         this.input_auto_completion({
             '.donate': [],
+            '.theme': [],
+            '.settings': [],
             '.help': [],
             '.info': [],
             '.rename': [],
@@ -39,14 +40,15 @@ class GlobalCommands {
         switch(args[0]) {
 
             case 'donate':
-                ipcRenderer.send('open-donation-window');
+                shell.openExternal('https://www.paypal.com/donate?business=tmickelson93%40gmail.com&item_name=VisualSpigot+Donations&currency_code=USD');
                 break;
 
             // display list of global commands
             case 'help':
                 this.handler.displayBlock(server.console, 
-                '<i class="fab fa-wpforms"></i>', 
+                '<i class="fab fa-wpforms"></i>',
                 "Global Command List",
+                ".donate: donate via paypal\n" +
                 ".start: start server\n" +
                 ".stop: stop server\n" +
                 ".kill: kill server process\n" +
@@ -55,6 +57,7 @@ class GlobalCommands {
                 ".port \"number\": set server port\n" +
                 ".ram \"number\": set server ram\n" +
                 ".rename \"name\": set server name\n" +
+                ".duplicate: duplicate selected server\n" +
                 ".files: open server file explorer\n" +
                 ".properties: open server properties\n" +
                 ".plugins: open server plugins folder\n" +
@@ -187,6 +190,14 @@ class GlobalCommands {
             case 'fontcolor':
                 let value = args.slice(1).join(' ');
                 this.handler.updateVisuals(args[0], value);
+                break;
+
+            case 'theme':
+                this.handler.toggleThemeSideBar();
+                break;
+
+            case 'settings':
+                this.handler.toggleSettingsSideBar();
                 break;
         }
     }

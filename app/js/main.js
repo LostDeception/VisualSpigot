@@ -23,7 +23,7 @@ if (!gotTheLock) {
       }
     })
   
-    async function createWindow(url, isMain) {
+    async function createWindow() {
 
         // window options
         let options = {
@@ -36,27 +36,24 @@ if (!gotTheLock) {
             }
         };
 
-        if(isMain) {
-            // -- create the browser window
-            win = new BrowserWindow(options);
+        // -- create the browser window
+        win = new BrowserWindow(options);
 
-            // get app cache size.. if cache is greater than 100000 bytes clear
-            let result = await win.webContents.session.getCacheSize();
-            if(result > 1000000) {
-                await win.webContents.session.clearCache();
-            }
-
-            // open dev panel
-            //win.webContents.openDevTools();
-
-            // load html file in browserwindow
-            win.loadURL(url)
-
-        } else {
-            var newWin = new BrowserWindow(options);
-            newWin.loadURL(url);
-            newWin.show();
+        // get app cache size.. if cache is greater than 100000 bytes clear
+        let result = await win.webContents.session.getCacheSize();
+        if(result > 1000000) {
+            await win.webContents.session.clearCache();
         }
+
+        // open dev panel
+        win.webContents.openDevTools();
+
+        // load html file in browserwindow
+        win.loadURL(url.format({
+            pathname: path.join(__dirname, '../index.html'),
+            protocol: 'file:', 
+            slashes: true
+        }));
     }
     
     app.on('window-all-closed', function(){
@@ -75,11 +72,7 @@ if (!gotTheLock) {
             autoUpdater.checkForUpdates();
     
             // create main window
-            await createWindow(url.format({
-                pathname: path.join(__dirname, '../index.html'),
-                protocol: 'file:', 
-                slashes: true
-            }), true);
+            await createWindow();
     
             // when DOM finished loading display window
             win.once('ready-to-show', function() {
@@ -100,10 +93,6 @@ if (!gotTheLock) {
             ipcMain.on('mainAppClose', function() {
                 force_quit=true; 
                 app.quit();
-            })
-
-            ipcMain.on('open-donation-window', function() {
-                createWindow("https://www.paypal.com/donate?business=tmickelson93%40gmail.com&item_name=VisualSpigot+Donations&currency_code=USD", false);
             })
         })
     })

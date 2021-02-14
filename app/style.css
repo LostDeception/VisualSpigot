@@ -18,10 +18,25 @@
   --fade: rgba(22, 22, 22, 0.74);
   --purple: rgb(252, 128, 252);
   --orange: rgb(255, 191, 52);
+
+  /* DEFAULT THEME */
+  --default-one: rgba(99, 99, 110, 0.7);
+  --default-two: rgba(60, 60, 65, 0.6);
+  --default-three: rgba(99, 99, 110, 0.411);
+
+  /* DARK THEME */
+  --dark-one: rgba(22, 25, 27, 0.5);
+  --dark-two: rgba(22, 25, 27, 0.8);
+  --dark-three: rgba(0, 0, 0, 0.5);
+
+  /* LIGHT THEME */
+  --light-one: rgba(139, 139, 160, 0.5);
+  --light-two: rgba(139, 139, 160, 0.8);
 }
 
 html,
-body {
+body,
+#main {
   width: auto;
   height: 100%;
   margin: 0;
@@ -31,6 +46,7 @@ body {
 
 body {
   position: relative;
+  background-color: black;
 }
 
 div::selection,
@@ -43,7 +59,7 @@ button {
   font-size: 14px;
   font-weight: 600;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
-  color: var(--dim-white);
+  color: var(--white);
 }
 button,
 button:focus,
@@ -105,6 +121,7 @@ h3,
 h4,
 h5,
 h6 {
+  margin: 0;
   user-select: none;
   pointer-events: none;
 }
@@ -124,16 +141,18 @@ li {
 
 .background {
   background-image: url("./images/bground1.jpg");
-  filter: blur(2px);
   background-repeat: no-repeat;
   background-size: cover;
-  opacity: 0.08;
+  opacity: 0.3;
   position: absolute;
   top: 0;
   left: 0;
   bottom: 0;
   right: 0;
   z-index: -1;
+}
+.background::before {
+  background-color: black;
 }
 
 /* application overlay styles */
@@ -184,7 +203,7 @@ li {
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
-  margin: 5px;
+  padding: 3px;
   overflow: hidden;
   animation: fadeIn;
   animation-duration: 2s;
@@ -206,7 +225,11 @@ li {
   display: flex;
   flex-direction: row;
   height: 40px;
-  border-bottom: 1px solid var(--darker-grey);
+  background-color: var(--default-two);
+  border-bottom: 1px solid var(--default-three);
+}
+#container-header button {
+  border-color: var(--default-three) !important;
 }
 #btn-dropdown-servers {
   overflow: hidden;
@@ -227,7 +250,7 @@ li {
 .custom-button {
   height: 100%;
   font-size: 16px;
-  min-width: 85px;
+  min-width: 80px;
   padding: 0 15px 0 15px;
   transition: background-color 0.5s ease-out;
 }
@@ -350,11 +373,12 @@ li {
   display: flex;
   margin-top: auto;
   border-radius: 3px;
+  background-color: var(--darker-grey);
 }
 #server-console-input {
   width: 100%;
   border-radius: 3px 0px 0px 3px;
-  background-color: var(--dim-grey);
+  background-color: var(--default-one);
 }
 #input-button-container {
   display: flex;
@@ -454,7 +478,7 @@ li {
   justify-content: center;
   align-items: center;
   background-color: rgba(17, 20, 22, 0.5);
-  border: 1px solid transparent;
+  border: 0.5px solid transparent;
 }
 #add-server-container {
   min-width: 650px;
@@ -562,7 +586,6 @@ li {
 #file-list {
   flex: 1 1 !important;
   overflow-y: auto;
-  position: relative;
 }
 #file-list a:hover {
   cursor: pointer;
@@ -582,9 +605,87 @@ li {
   color: var(--lime);
 }
 
+/* SIDEBAR STYLES */
+#main {
+  transition: margin-right 0.5s;
+}
+
+/* settings sidebar styles */
+#settings-side-bar {
+}
+
+/* theme sidebar styles */
+#theme-side-bar {
+}
+#theme-side-bar h5 {
+  margin-top: 10px;
+  border-bottom: 1px solid var(--default-three);
+}
+#btnBackgroundImage {
+  width: 240px;
+  height: 175px;
+  border: 1px solid #616161;
+  transition: border-color 0.5s;
+}
+#btnBackgroundImage:hover {
+  border-color: #818181;
+  cursor: pointer;
+}
+#defaultThemePanel {
+}
+#defaultTextPanel {
+}
+
+.sidebar {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  right: 0;
+  background-color: rgba(17, 17, 17, 0.808); /* Black*/
+  border-left: 1px solid var(--default-three);
+  overflow-x: hidden; /* Disable horizontal scroll */
+  transition: 0.5s; /* 0.5 second transition effect to slide in the sidenav */
+}
+.sidebar-container {
+  height: 100%;
+  transition: opacity 0.5s;
+}
+.sidebar-header {
+  height: 55px;
+  display: flex;
+  align-items: center;
+  color: #818181;
+  padding-left: 15px;
+  border-bottom: 1px solid var(--default-three);
+}
+.sidebar-body {
+  display: flex;
+  flex-direction: column;
+  color: #818181;
+  padding: 5px;
+}
+.sidebar .closebtn {
+  height: 25px;
+  position: absolute;
+  top: 0px;
+  right: 15px;
+  font-size: 36px;
+  color: #818181;
+}
+.sidebar .closebtn:hover {
+  color: #f1f1f1;
+  cursor: pointer;
+}
+
 /* BOOTSTRAP MODAL STYLES */
 .modal {
   padding-left: 0px !important;
+  z-index: 999;
+}
+.modal-backdrop {
+  z-index: 998;
 }
 .modal-body {
   padding: 0px !important;

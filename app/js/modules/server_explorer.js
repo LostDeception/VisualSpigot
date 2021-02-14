@@ -12,6 +12,7 @@ class ServerExplorer {
         this.handler = handler;
 
         let self = this;
+        this.filesDisplayed = false;
         this.allowedFiles = ['.txt', '.yml', '.json', '.properties', '.log', '.bat'];
         this.excludedFiles = ['eula.txt', 'vsc-v1.0.8.jar'];
 
@@ -27,7 +28,7 @@ class ServerExplorer {
         }
 
         // navigates back a directory
-        this.handler.btn_back_dir.addEventListener('click', function() {
+        handler.btn_back_dir.addEventListener('click', function() {
             if(self.currentDir !== self.baseDir) {
                 let previousDir = path.join(self.currentDir, '..');
                 self.generateFileList(previousDir);
@@ -39,7 +40,7 @@ class ServerExplorer {
         })
 
         // open current directory on desktop
-        this.handler.btn_open_dir.addEventListener('click', function() {
+        handler.btn_open_dir.addEventListener('click', function() {
             if(fs.existsSync(self.currentDir)) {
                 shell.openPath(self.currentDir);
             }
@@ -47,12 +48,21 @@ class ServerExplorer {
 
         // write data to modified file
         let savingFile = false;
-        this.handler.btn_save_file.addEventListener('click', function() {
+        handler.btn_save_file.addEventListener('click', function() {
             if(!savingFile) {
                 let data = self.editor.getValue();
                 if(data != undefined && data != '') {
                     savingFile = true;
                     self.handler.save_file_notif.style.display = 'none';
+
+                    // rename .jar to server file name for user before saving
+                    if(path.basename(self.currentDir) == 'run.bat') {
+                        let server = self.handler.getSelectedServer();
+                        data = self.handler.processBatFile(data, server.file);
+                        self.editor.setValue(data);
+                    }
+
+                    // write data to current file
                     fs.writeFile(self.currentDir, data, (err) => {
                         if(err) {
                             savingFile = false;
@@ -64,6 +74,20 @@ class ServerExplorer {
                         savingFile = false;
                     })
                 }
+            }
+        })
+
+        // setup drag-drop for files
+        handler.initializeDragDrop(handler.file_list, (e) => {
+
+            // if file list is being displayed in file_list container
+            if(self.filesDisplayed) {
+                Array.from(e.files).forEach(file => {
+                    let destPath = path.join(this.currentDir, file.name);
+                    this.handler.moveFiles(file.path, destPath, () => {
+                        this.generateFileList(this.currentDir);
+                    })
+                })
             }
         })
 
@@ -105,8 +129,6 @@ class ServerExplorer {
                 self.generateFileList(self.currentDir);
             })
         })
-
-        
     }
 
     /**
@@ -133,11 +155,15 @@ class ServerExplorer {
                 // be sure that file info is not undefined or null
                 if(dirInfo) {
 
+                    // files are being displayed
+                    this.filesDisplayed = true;
+
                     // set header text
                     self.setHeaderText(directory);
                     
                     // clear the file list
                     this.handler.file_list.innerHTML = '';
+                    this.handler.file_list.style.border = '0.5px solid transparent';
 
                     // reset save file notification animation and hide main container
                     this.handler.save_file_notif.style.display = 'none';
@@ -192,9 +218,10 @@ class ServerExplorer {
 
                                         // create button element (used to display file)
                                         var btn = document.createElement('a');
+                                        //btn.draggable = true;
                                         btn.tabIndex = 1;
                                         btn.classList.add('list-group-item', 'list-group-item-action', 'rounded-0');
-                                        
+
                                         // icon that will appear on the button (default to folder icon)
                                         var btnIcon = '<i class="fa fa-folder" style="color:var(--yellow)"></i> ';
 
@@ -289,15 +316,19 @@ class ServerExplorer {
         // check that extension can be opened
         if(this.allowedFiles.includes(ext)) {
 
-            // reset save file notification animation and hide main container
-            this.handler.save_file_notif.style.display = 'none';
-            this.handler.main_container.style.visibility = 'hidden';
+            // file editor is being displayed
+            this.filesDisplayed = false;
 
             // set file-explorer header text
             this.setHeaderText(filePath);
 
+            // reset save file notification animation and hide main container
+            this.handler.save_file_notif.style.display = 'none';
+            this.handler.main_container.style.visibility = 'hidden';
+
             // clear file list
             this.handler.file_list.innerHTML = '';
+            this.handler.file_list.style.border = 'none';
 
             // elements to display while inside file
             this.handler.btn_save_file.style.display = 'block';
@@ -313,6 +344,7 @@ class ServerExplorer {
 
             // create textarea for file contents
             let content = document.createElement('textarea');
+
             var data = '';
 
             switch(ext) {
@@ -324,7 +356,6 @@ class ServerExplorer {
                     break;
             }
 
-            //content.innerHTML = data.toString().trim();
             $(this.handler.file_list).append(content).append(function() {
 
                 $('#serverFilesModal').modal();

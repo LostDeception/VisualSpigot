@@ -177,16 +177,11 @@ class ServerHandler extends ServerHelpers {
             let self = this;
             let drop_container = document.querySelector('#file-drop-container');
 
-            drop_container.addEventListener('drop', function (e) {
-
-                drop_container.style.borderColor = 'rgb(44, 47, 51)';
-                drop_container.style.borderThickness = '1px';
-
-                let file = e.dataTransfer.files[0];
-
+            this.initializeDragDrop(drop_container, (e) => {
+                let file = e.files[0];
                 if (file) {
 
-                    if (e.dataTransfer.types == "Files") {
+                    if (e.types == "Files") {
                         self.create_server_folder(self.nativeDir, file.name, function (folder_dir) {
                             if (folder_dir) {
                                 let s_dir = path.join(folder_dir, file.name);
@@ -196,7 +191,7 @@ class ServerHandler extends ServerHelpers {
 
                                     if (err) {
                                         $('#addServerModel').modal('hide');
-                                        self.notifier.alert(err);
+                                        self.notifier.alert(err.toString());
                                         return;
                                     }
 
@@ -215,22 +210,6 @@ class ServerHandler extends ServerHelpers {
                         })
                     }
                 }
-            })
-
-            // -- when user drags file into drop container
-            drop_container.addEventListener('dragenter', function (e) {
-                e.preventDefault();
-                drop_container.style.borderColor = 'rgba(171, 223, 122, 0.856)';
-            })
-
-            // -- when user drags file over drop container
-            drop_container.addEventListener('dragover', function (e) {
-                e.preventDefault();
-            })
-
-            // -- when user leaves drag container
-            drop_container.addEventListener('dragleave', function (e) {
-                drop_container.style.borderColor = 'rgb(44, 47, 51)';
             })
         } catch (err) {
             self.notifier.alert(err);
@@ -342,22 +321,16 @@ class ServerHandler extends ServerHelpers {
      */
     add_plugin_handler() {
         let self = this;
-
-        this.console_container.addEventListener('drop', function (e) {
-
+        this.initializeDragDrop(this.console_container, function(e) {
             try {
-                self.console_container.style.borderColor = 'transparent';
-
-                Object.keys(e.dataTransfer.files).forEach(key => {
-                    let file = e.dataTransfer.files[key];
-                    if (file && e.dataTransfer.types == "Files") {
-
+                Object.keys(e.files).forEach(key => {
+                    let file = e.files[key];
+                    if(file && e.types == "Files") {
                         self.server_access((server) => {
                             if (path.extname(file.name) == '.jar') {
 
                                 // create plugin folder
                                 self.createPluginFolder(server.directory);
-
                                 let pluginDir = path.join(server.directory, 'plugins');
                                 let destinDir = path.join(pluginDir, file.name);
     
@@ -365,7 +338,7 @@ class ServerHandler extends ServerHelpers {
                                     fs.unlink(destinDir, () => {
                                         fs.rename(file.path, destinDir, function (err) {
                                             if (err) {
-                                                self.notifier.alert(err);
+                                                self.notifier.alert(err.toString());
                                                 return;
                                             }
     
@@ -375,7 +348,7 @@ class ServerHandler extends ServerHelpers {
                                 } else {
                                     fs.rename(file.path, destinDir, function (err) {
                                         if (err) {
-                                            self.notifier.alert(err);
+                                            self.notifier.alert(err.toString());
                                             return;
                                         }
     
@@ -386,26 +359,12 @@ class ServerHandler extends ServerHelpers {
                                 server.displayMessage(file.name + ' is not a plugin', 'var(--red)', false, true);
                             }
                         })
-                    }    
-                });
-                
-            } catch (err) {
-                self.notifier.alert(err);
+                    }
+                })
+            } catch(err) {
+                self.notifier.alert(err.toString());
                 console.log(err);
             }
-        })
-
-        this.console_container.addEventListener('dragenter', function (e) {
-            e.preventDefault();
-            self.console_container.style.borderColor = 'rgba(171, 223, 122, 0.856)';
-        })
-
-        this.console_container.addEventListener('dragover', function (e) {
-            e.preventDefault();
-        })
-
-        this.console_container.addEventListener('dragleave', function (e) {
-            self.console_container.style.borderColor = 'transparent';
         })
     }
 

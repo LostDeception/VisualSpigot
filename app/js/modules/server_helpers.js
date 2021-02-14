@@ -5,7 +5,7 @@ var fs = require('fs-extra');
 var path = require('path');
 var store = require('store');
 var rmdir = require('rimraf');
-const { ipcRenderer } = require('electron');
+const { shell } = require('electron');
 
 class DomHandler {
     constructor() {
@@ -20,13 +20,26 @@ class DomHandler {
             maxNotifications: 3
         })
 
+        this.main = document.getElementById('main');
         this.main_container = document.getElementById('main-container');
         this.logo_container = document.getElementById('logo-container');
+
+        /**
+         * add click event to the close sidebar buttons
+         */
+        let exitSidebar = document.getElementsByClassName('closebtn');
+        Array.from(exitSidebar).forEach(btn => {
+            btn.addEventListener('click', function() {
+                let parent = btn.parentElement;
+                parent.style.width = '0';
+                self.main.style.marginRight = '0';
+            })
+        })
 
         // setup donation button click event
         let btn_donate = document.getElementById('btn-paypal-donation');
         btn_donate.addEventListener('click', function() {
-            ipcRenderer.send('open-donation-window');
+            shell.openExternal('https://www.paypal.com/donate?business=tmickelson93%40gmail.com&item_name=VisualSpigot+Donations&currency_code=USD');
         })
 
         // server console elements
@@ -81,7 +94,7 @@ class DomHandler {
         })
 
          // default styles
-         this.dStyles = {
+        this.dStyles = {
             font: 'monospace',
             fontsize: '15px',
             fontcolor: 'lightsteelblue'
@@ -327,6 +340,85 @@ class DomHandler {
             parentNode.scrollTop = parentNode.scrollHeight;
         }
     }
+
+    // apply drag-drop to container
+    initializeDragDrop(element, callback) {
+        element.addEventListener('drop', function (e) {
+            element.style.borderColor = 'transparent';
+            callback(e.dataTransfer);
+        })
+
+        element.addEventListener('dragenter', function (e) {
+            e.preventDefault();
+            element.style.borderColor = 'var(--lime)';
+        })
+
+        element.addEventListener('dragleave', function (e) {
+            if(!element.contains(e.relatedTarget)) {
+                element.style.borderColor = 'transparent';
+            }
+        })
+
+        element.addEventListener('dragover', function (e) {
+            e.preventDefault();
+            element.style.borderColor = 'var(--lime)';
+        })
+    }
+
+    setTheme(theme) {
+        let background = document.getElementsByClassName('background')[0];
+        let header = document.getElementById('container-header');
+        switch(theme) {
+            case 'default':
+                background.style.opacity = '0.3';
+                header.style.backgroundColor = 'var(--default-two)';
+                header.style.borderColor = 'var(--default-three)';
+                this.console_input.style.backgroundColor = 'var(--default-one)';
+                break;
+            case 'dark':
+                background.style.opacity = '0.2';
+                //this.main_container.style.backgroundColor = 'var(--dark-three)';
+                header.style.backgroundColor = 'var(--dark-two)';
+                this.console_input.style.backgroundColor = 'var(--dark-two)';
+                break;
+            case 'light':
+                header.style.backgroundColor = 'var(--light-one)';
+                this.console_input.style.backgroundColor = 'var(--light-two)';
+                break;
+        }
+    }
+
+    /**
+     * if settings sidebar is open 
+     * than close it otherwise open it
+     */
+    toggleSettingsSideBar() {
+        let main = document.getElementById('main');
+        let sidebar = document.getElementById('settings-side-bar');
+        if(sidebar.style.width == '250px') {
+            sidebar.style.width = '0';
+            main.style.marginRight = '0';
+        } else {
+            sidebar.style.width = '250px';
+            main.style.marginRight = '250px';
+        }
+    }
+
+    /**
+     * if theme sidebar is open
+     * than close it otherwise open it
+     */
+    toggleThemeSideBar() {
+        let main = document.getElementById('main');
+        let sidebar = document.getElementById('theme-side-bar');
+        if(sidebar.style.width == '250px') {
+            sidebar.style.width = '0';
+            main.style.marginRight = '0';
+        } else {
+            sidebar.style.width = '250px';
+            main.style.marginRight = '250px';
+        }
+    }
 }
 
 class ServerHelpers extends DomHandler {
@@ -509,7 +601,14 @@ class ServerHelpers extends DomHandler {
     // create run.bat file with pre-built start-script
     createBatFile(dir, file, callback) {
         let batPath = path.join(dir, 'run.bat');
-        let start_script = 'java -Xms1G -Xmx2G -jar ' + file + ' nogui';
+
+        // start script url(https://aikar.co/2018/07/02/tuning-the-jvm-g1gc-garbage-collector-flags-for-minecraft/)
+        let start_script = "java -Xms2G -Xmx2G -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -" +
+        "XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:+AlwaysPreTouch -XX:G1NewSizePercent=30 -" +
+        "XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=8M -XX:G1ReservePercent=20 -XX:G1HeapWastePercent=5 -" +
+        "XX:G1MixedGCCountTarget=4 -XX:InitiatingHeapOccupancyPercent=15 -XX:G1MixedGCLiveThresholdPercent=90 -" +
+        "XX:G1RSetUpdatingPauseTimePercent=5 -XX:SurvivorRatio=32 -XX:+PerfDisableSharedMem -" +
+        "XX:MaxTenuringThreshold=1 -Dusing.aikars.flags=https://mcflags.emc.gs -Daikars.new.flags=true -jar "+ file +" nogui";
 
         // create run.bat file
         this.createFile(batPath, start_script, (err) => {
@@ -525,10 +624,21 @@ class ServerHelpers extends DomHandler {
     }
 
     // check that .bat file command has required args
-    processBatFile(dir, file) {
+    processBatFile(script, file) {
         let changeDetected = false;
-        let p = path.join(dir, 'run.bat');
-        let command = fs.readFileSync(p, 'utf-8');
+
+        let p = '';
+        let command = '';
+        let isDirectory = false;
+        let fdata = this.fileInfo(script, false);
+
+        if(fdata) {
+            isDirectory = true;
+            p = path.join(script, 'run.bat');
+            command = fs.readFileSync(p, 'utf-8');
+        } else {
+            command = script;
+        }
 
         // check that .jar matches file name
         let a = command.indexOf('.jar');
@@ -545,7 +655,12 @@ class ServerHelpers extends DomHandler {
         // if there is a change detected
         if(changeDetected) {
             let newCommand = args.join(' ');
-            fs.writeFileSync(p, newCommand);
+
+            if(isDirectory) {
+                fs.writeFileSync(p, newCommand);
+            } else {
+                return newCommand;
+            }
         }
     }
 
@@ -720,27 +835,6 @@ class ServerHelpers extends DomHandler {
         })
     }
 
-    // return time from milliseconds
-    msToTime(duration) {
-
-        /**
-            var milliseconds = parseInt((duration % 1000) / 100),
-            seconds = Math.floor((duration / 1000) % 60),
-            minutes = Math.floor((duration / (1000 * 60)) % 60),
-            hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
-        */
-
-        var seconds = Math.floor((duration / 1000) % 60),
-        minutes = Math.floor((duration / (1000 * 60)) % 60),
-        hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
-      
-        hours = (hours < 10) ? "0" + hours : hours;
-        minutes = (minutes < 10) ? "0" + minutes : minutes;
-        seconds = (seconds < 10) ? "0" + seconds : seconds;
-      
-        return hours + ":" + minutes + ":" + seconds;
-    }
-
 
     // FILE HANDLER FUNCTIONS
     createFile(filePath, data, callback) {
@@ -893,7 +987,7 @@ class ServerHelpers extends DomHandler {
                                 callback(jsonContent);
                             })
                         } else {
-                            jsonObj = fs.readFileSync(filePath, 'utf-8');
+                            jsonObj = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
                             jsonContent = JSON.stringify(jsonObj, undefined, 2);
                             if(callback) callback(jsonContent);
                             return jsonContent;
@@ -920,6 +1014,30 @@ class ServerHelpers extends DomHandler {
             })
         } else {
             this.notifier.alert('Files already exist sh-cf');
+        }
+    }
+
+    moveFiles(srcDir, destDir, callback) {
+        let self = this;
+        if(fs.existsSync(srcDir)) {
+
+            // if the dest path already exists delete it
+            if(fs.existsSync(destDir)) {
+                self.deleteFile(destDir);
+            }
+
+            fs.move(srcDir, destDir, err => {
+                if(err) {
+                    self.notifier.alert(err.toString());
+                    console.log(err);
+                }
+
+                if(callback) {
+                    callback();
+                }
+            })
+        } else {
+            this.notifier.alert('Invalid source directory sh-mf');
         }
     }
 }
