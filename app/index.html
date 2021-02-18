@@ -53,10 +53,12 @@
 
                 <!-- application header -->
                 <div id="container-header">
-                    <button id="btn-add-server" class="custom-button">Add Server</button>
-                    <div class="custom-dropdown">
-                        <button id="btn-dropdown-servers" class="dropbtn">Select A Server</button>
-                        <div id="dropdown-servers" class="dropdown-content scroller"></div>
+                    <div id="container-header-start">
+                        <button id="btn-add-server" class="custom-button">Add Server</button>
+                        <div class="custom-dropdown">
+                            <button id="btn-dropdown-servers" class="dropbtn">Select A Server</button>
+                            <div id="dropdown-servers" class="dropdown-content scroller"></div>
+                        </div>
                     </div>
 
                     <div id="container-header-end">
@@ -83,7 +85,7 @@
 
                     <!-- server input display -->
                     <div id="server-input-container">
-                        <input id="server-console-input" spellcheck="false" placeholder="Type a command...">
+                        <input id="server-console-input" class="custom-input" spellcheck="false" placeholder="Type a command...">
                         <div id="input-button-container">
                             <button id="btn-file-explorer" class="custom-button" data-toggle="tooltip" data-placement="top" title="server files"><i class="fas fa-folder"></i></button>
                             <button id="btn-delete-server" class="custom-button" data-toggle="tooltip" data-placement="top" title="delete server"><i class="fas fa-trash"></i></button>
@@ -128,55 +130,55 @@
                                         <!-- 1.16.5 DOWNLOADS -->
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                         Spigot 1.16.5
-                                        <button class="custom-button server-download" data-url="https://cdn.getbukkit.org/spigot/spigot-1.16.5.jar" data-filename="spigot-1.16.5.jar">Download</button>
+                                        <button class="custom-button btn-server-download" data-url="https://cdn.getbukkit.org/spigot/spigot-1.16.5.jar" data-filename="spigot-1.16.5.jar">Download</button>
                                         </li>
 
                                         <!-- 1.15.2 DOWNLOADS -->
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                         Spigot 1.15.2
-                                        <button class="custom-button server-download" data-url="https://cdn.getbukkit.org/spigot/spigot-1.15.2.jar" data-filename="spigot-1.15.2.jar">Download</button>
+                                        <button class="custom-button btn-server-download" data-url="https://cdn.getbukkit.org/spigot/spigot-1.15.2.jar" data-filename="spigot-1.15.2.jar">Download</button>
                                         </li>
 
                                         <!-- 1.14.4 DOWNLOADS -->
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                         Spigot 1.14.4
-                                        <button class="custom-button server-download" data-url="https://cdn.getbukkit.org/spigot/spigot-1.14.4.jar" data-filename="spigot-1.14.4.jar">Download</button>
+                                        <button class="custom-button btn-server-download" data-url="https://cdn.getbukkit.org/spigot/spigot-1.14.4.jar" data-filename="spigot-1.14.4.jar">Download</button>
                                         </li>
 
                                         <!-- 1.13.2 DOWNLOADS -->
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             Spigot 1.13.2
-                                            <button class="custom-button server-download" data-url="https://cdn.getbukkit.org/spigot/spigot-1.13.2.jar" data-filename="spigot-1.13.2.jar">Download</button>
+                                            <button class="custom-button btn-server-download" data-url="https://cdn.getbukkit.org/spigot/spigot-1.13.2.jar" data-filename="spigot-1.13.2.jar">Download</button>
                                         </li>
 
                                         <!-- 1.12.2 DOWNLOADS -->
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             Spigot 1.12.2
-                                            <button class="custom-button server-download" data-url="https://cdn.getbukkit.org/spigot/spigot-1.12.2.jar" data-filename="spigot-1.12.2.jar">Download</button>
+                                            <button class="custom-button btn-server-download" data-url="https://cdn.getbukkit.org/spigot/spigot-1.12.2.jar" data-filename="spigot-1.12.2.jar">Download</button>
                                         </li>
 
                                         <!-- 1.11.2 DOWNLOADS -->
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             Spigot 1.11.2
-                                            <button class="custom-button server-download" data-url="https://cdn.getbukkit.org/spigot/spigot-1.11.2.jar" data-filename="spigot-1.11.2.jar">Download</button>
+                                            <button class="custom-button btn-server-download" data-url="https://cdn.getbukkit.org/spigot/spigot-1.11.2.jar" data-filename="spigot-1.11.2.jar">Download</button>
                                         </li>
 
                                         <!-- 1.10.2 DOWNLOADS -->
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             Spigot 1.10.2
-                                            <button class="custom-button server-download" data-url="https://cdn.getbukkit.org/spigot/spigot-1.10.2-R0.1-SNAPSHOT-latest.jar" data-filename="spigot-1.10.2.jar">Download</button>
+                                            <button class="custom-button btn-server-download" data-url="https://cdn.getbukkit.org/spigot/spigot-1.10.2-R0.1-SNAPSHOT-latest.jar" data-filename="spigot-1.10.2.jar">Download</button>
                                         </li>
 
                                         <!-- 1.9.4 DOWNLOADS -->
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             Spigot 1.9.4
-                                            <button class="custom-button server-download" data-url="https://cdn.getbukkit.org/spigot/spigot-1.9.4-R0.1-SNAPSHOT-latest.jar" data-filename="spigot-1.9.4.jar">Download</button>
+                                            <button class="custom-button btn-server-download" data-url="https://cdn.getbukkit.org/spigot/spigot-1.9.4-R0.1-SNAPSHOT-latest.jar" data-filename="spigot-1.9.4.jar">Download</button>
                                         </li>
 
                                         <!-- 1.8.8 DOWNLOADS -->
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             Spigot 1.8.8
-                                            <button class="custom-button server-download" data-url="https://cdn.getbukkit.org/spigot/spigot-1.8.8-R0.1-SNAPSHOT-latest.jar" data-filename="spigot-1.8.8.jar">Download</button>
+                                            <button class="custom-button btn-server-download" data-url="https://cdn.getbukkit.org/spigot/spigot-1.8.8-R0.1-SNAPSHOT-latest.jar" data-filename="spigot-1.8.8.jar">Download</button>
                                         </li>
                                     </ul>
                                 </div>
@@ -187,61 +189,61 @@
                                         <!-- 1.16.4 DOWNLOADS -->
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             Paper 1.16.5
-                                            <button class="custom-button server-download" data-url="https://papermc.io/api/v2/projects/paper/versions/1.16.5/builds/428/downloads/paper-1.16.5-428.jar" data-filename="paper-1.16.5.jar">Download</button>
+                                            <button class="custom-button btn-server-download" data-url="https://papermc.io/api/v2/projects/paper/versions/1.16.5/builds/428/downloads/paper-1.16.5-428.jar" data-filename="paper-1.16.5.jar">Download</button>
                                         </li>
 
                                         <!-- 1.16.4 DOWNLOADS -->
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                         Paper 1.16.4
-                                        <button class="custom-button server-download" data-url="https://papermc.io/api/v2/projects/paper/versions/1.16.4/builds/408/downloads/paper-1.16.4-408.jar" data-filename="paper-1.16.4.jar">Download</button>
+                                        <button class="custom-button btn-server-download" data-url="https://papermc.io/api/v2/projects/paper/versions/1.16.4/builds/408/downloads/paper-1.16.4-408.jar" data-filename="paper-1.16.4.jar">Download</button>
                                         </li>
 
                                         <!-- 1.15.2 DOWNLOADS -->
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             Paper 1.15.2
-                                        <button class="custom-button server-download" data-url="https://papermc.io/api/v2/projects/paper/versions/1.15.2/builds/391/downloads/paper-1.15.2-391.jar" data-filename="paper-1.15.2.jar">Download</button>
+                                        <button class="custom-button btn-server-download" data-url="https://papermc.io/api/v2/projects/paper/versions/1.15.2/builds/391/downloads/paper-1.15.2-391.jar" data-filename="paper-1.15.2.jar">Download</button>
                                         </li>
 
                                         <!-- 1.14.4 DOWNLOADS -->
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             Paper 1.14.4
-                                        <button class="custom-button server-download" data-url="https://papermc.io/api/v2/projects/paper/versions/1.14.4/builds/243/downloads/paper-1.14.4-243.jar" data-filename="paper-1.14.4.jar">Download</button>
+                                        <button class="custom-button btn-server-download" data-url="https://papermc.io/api/v2/projects/paper/versions/1.14.4/builds/243/downloads/paper-1.14.4-243.jar" data-filename="paper-1.14.4.jar">Download</button>
                                         </li>
 
                                         <!-- 1.13.2 DOWNLOADS -->
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             Paper 1.13.2
-                                            <button class="custom-button server-download" data-url="https://papermc.io/api/v2/projects/paper/versions/1.13.2/builds/655/downloads/paper-1.13.2-655.jar" data-filename="paper-1.13.2.jar">Download</button>
+                                            <button class="custom-button btn-server-download" data-url="https://papermc.io/api/v2/projects/paper/versions/1.13.2/builds/655/downloads/paper-1.13.2-655.jar" data-filename="paper-1.13.2.jar">Download</button>
                                         </li>
 
                                         <!-- 1.12.2 DOWNLOADS -->
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             Paper 1.12.2
-                                            <button class="custom-button server-download" data-url="https://papermc.io/api/v2/projects/paper/versions/1.12.2/builds/1618/downloads/paper-1.12.2-1618.jar" data-filename="paper-1.12.2.jar">Download</button>
+                                            <button class="custom-button btn-server-download" data-url="https://papermc.io/api/v2/projects/paper/versions/1.12.2/builds/1618/downloads/paper-1.12.2-1618.jar" data-filename="paper-1.12.2.jar">Download</button>
                                         </li>
 
                                         <!-- 1.11.2 DOWNLOADS -->
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             Paper 1.11.2
-                                            <button class="custom-button server-download" data-url="https://papermc.io/api/v2/projects/paper/versions/1.11.2/builds/1104/downloads/paper-1.11.2-1104.jar" data-filename="paper-1.11.2.jar">Download</button>
+                                            <button class="custom-button btn-server-download" data-url="https://papermc.io/api/v2/projects/paper/versions/1.11.2/builds/1104/downloads/paper-1.11.2-1104.jar" data-filename="paper-1.11.2.jar">Download</button>
                                         </li>
 
                                         <!-- 1.10.2 DOWNLOADS -->
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             Paper 1.10.2
-                                            <button class="custom-button server-download" data-url="https://papermc.io/api/v2/projects/paper/versions/1.10.2/builds/916/downloads/paper-1.10.2-916.jar" data-filename="paper-1.10.2.jar">Download</button>
+                                            <button class="custom-button btn-server-download" data-url="https://papermc.io/api/v2/projects/paper/versions/1.10.2/builds/916/downloads/paper-1.10.2-916.jar" data-filename="paper-1.10.2.jar">Download</button>
                                         </li>
 
                                         <!-- 1.9.4 DOWNLOADS -->
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             Paper 1.9.4
-                                            <button class="custom-button server-download" data-url="https://papermc.io/api/v2/projects/paper/versions/1.9.4/builds/773/downloads/paper-1.9.4-773.jar" data-filename="paper-1.9.4.jar">Download</button>
+                                            <button class="custom-button btn-server-download" data-url="https://papermc.io/api/v2/projects/paper/versions/1.9.4/builds/773/downloads/paper-1.9.4-773.jar" data-filename="paper-1.9.4.jar">Download</button>
                                         </li>
 
                                         <!-- 1.8.8 DOWNLOADS -->
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             Paper 1.8.8
-                                            <button class="custom-button server-download" data-url="https://papermc.io/api/v2/projects/paper/versions/1.8.8/builds/443/downloads/paper-1.8.8-443.jar" data-filename="paper-1.8.8.jar">Download</button>
+                                            <button class="custom-button btn-server-download" data-url="https://papermc.io/api/v2/projects/paper/versions/1.8.8/builds/443/downloads/paper-1.8.8-443.jar" data-filename="paper-1.8.8.jar">Download</button>
                                         </li>
                                     </ul>
                                 </div>
@@ -252,13 +254,13 @@
                                         <!-- 1.16.5 DOWNLOADS -->
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             Purpur 1.16.5
-                                            <button class="custom-button server-download" data-url="https://purpur.pl3x.net/api/v1/purpur/1.16.5/958/download" data-filename="purpur-1.16.5.jar">Download</button>
+                                            <button class="custom-button btn-server-download" data-url="https://purpur.pl3x.net/api/v1/purpur/1.16.5/958/download" data-filename="purpur-1.16.5.jar">Download</button>
                                         </li>
 
                                         <!-- 1.16.4 DOWNLOADS -->
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             Tuinity 1.16.5
-                                            <button class="custom-button server-download" data-url="https://ci.codemc.io/job/Spottedleaf/job/Tuinity/lastSuccessfulBuild/artifact/tuinity-paperclip.jar" data-filename="tuinity-1.16.5.jar">Download</button>
+                                            <button class="custom-button btn-server-download" data-url="https://ci.codemc.io/job/Spottedleaf/job/Tuinity/lastSuccessfulBuild/artifact/tuinity-paperclip.jar" data-filename="tuinity-1.16.5.jar">Download</button>
                                         </li>
                                     </ul>
                                 </div>
@@ -296,7 +298,7 @@
                                 <div id="file-list-header-end">
 
                                     <!-- search for files in directory -->
-                                    <input id="file-list-search" placeholder="Search..." spellcheck="false">
+                                    <input id="file-list-search" class="custom-input" placeholder="Search..." spellcheck="false">
 
                                     <!-- choose code editor theme -->
                                     <div id="editor-theme" class="custom-dropdown" style="display: none;">
@@ -342,47 +344,176 @@
                     <h4><i class="fas fa-paint-brush"></i> Editor</h4>
                 </div>
                 <div class="sidebar-body">
+
+                    <!-- add,delete or apply theme -->
                     <div class="sidebar-panel">
-                        <img id="btnBackgroundImage" src="./images/bground1.jpg"></img>
-                    </div>
-                    <div id="defaultThemePanel">
-                        <h5><i class="fas fa-images"></i> Themes</h5>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1">
-                            <label class="form-check-label" for="flexRadioDefault1">
-                               Default
-                            </label>
+                        <div class="sidebar-panel-header">
+                            <h5><i class="fas fa-swatchbook"></i> Themes</h5>
+                            <a class="sidebar-panel-toggle"><i class="fas fa-arrow-down"></i></a>
                         </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2">
-                            <label class="form-check-label" for="flexRadioDefault2">
-                                Light
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault3">
-                            <label class="form-check-label" for="flexRadioDefault3">
-                                Dark
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault4">
-                            <label class="form-check-label" for="flexRadioDefault4">
-                                Pink
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault5">
-                            <label class="form-check-label" for="flexRadioDefault5">
-                                Twilight
-                            </label>
+                        <div class="sidebar-panel-body">
                         </div>
                     </div>
-                    <div id="defaultTextPanel">
-                        <h5><i class="fas fa-text-width"></i> Text</h5>
+
+                    <!-- change background image and opacity -->
+                    <div class="sidebar-panel">
+                        <div class="sidebar-panel-header">
+                            <h5><i class="fas fa-images"></i> Background</h5>
+                            <a class="sidebar-panel-toggle"><i class="fas fa-arrow-down"></i></a>
+                        </div>
+
+                        <div class="sidebar-panel-body">
+                            <img id="btnBackgroundImage" src="./images/bground1.jpg"></img>
+
+                            <label class="form-label">Background Opacity</label>
+                            <div class="sidebar-row">
+                                <input class="editor-input custom-input" value="0.3" maxlength="2">
+                                <input type="range" data-edit="--background-opacity" class="slider" value="0.3" min="0.1" max="1" step="0.1">
+                            </div>
+
+                            <label class="form-label">Background Blur</label>
+                            <div class="sidebar-row">
+                                <input class="editor-input custom-input" value="0" maxlength="2">
+                                <input type="range" data-edit="--background-blur" data-ext="px" class="slider" value="0" min="0" max="5" step="1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- basic color palette for application -->
+                    <div class="sidebar-panel">
+
+                        <div class="sidebar-panel-header">
+                            <h5><i class="fas fa-palette"></i> Colors</h5>
+                            <a class="sidebar-panel-toggle"><i class="fas fa-arrow-down"></i></a>
+                        </div>
+
+                        <div class="sidebar-panel-body">
+                            
+                            <label class="form-label">Primary</label>
+                            <div class="sidebar-column">
+                                <div class="picker-button" data-color="--primary-color"></div>
+                                <div class="picker"  acp-show-rgb="no" acp-show-hsl="no" acp-show-hex="yes" acp-show-alpha></div>
+                            </div>
+                            
+                            <label class="form-label">Accent</label>
+                            <div class="sidebar-column">
+                                <div class="picker-button" data-color="--accent-color"></div>
+                                <div class="picker"  acp-show-rgb="no" acp-show-hsl="no" acp-show-hex="yes" acp-show-alpha></div>
+                            </div>
+    
+                            <label class="form-label">Shadow</label>
+                            <div class="sidebar-column">
+                                <div class="picker-button" data-color="--shadow-color"></div>
+                                <div class="picker"  acp-show-rgb="no" acp-show-hsl="no" acp-show-hex="yes" acp-show-alpha></div>
+                            </div>
+    
+                            <label class="form-label">Scrollbar</label>
+                            <div class="sidebar-column">
+                                <div class="picker-button" data-color="--scrollbar-color"></div>
+                                <div class="picker"  acp-show-rgb="no" acp-show-hsl="no" acp-show-hex="yes" acp-show-alpha></div>
+                            </div>
+
+                            <label class="form-label">Buttons</label>
+                            <div class="sidebar-column">
+                                <div class="input-group">
+                                    <div class="sidebar-row input-group-prepend">
+                                      <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Select Button</button>
+                                      <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="#" data-edit="--btn-add-server">Add Server</a>
+                                        <a class="dropdown-item" href="#" data-edit="--btn-start-server">Start</a>
+                                        <a class="dropdown-item" href="#" data-edit="--btn-stop-server">Stop</a>
+                                        <a class="dropdown-item" href="#" data-edit="--btn-kill-server">Kill</a>
+                                        <a class="dropdown-item" href="#" data-edit="--btn-restart-server">Restart</a>
+                                        <div role="separator" class="dropdown-divider"></div>
+                                        <a class="dropdown-item" href="#" data-edit="--btn-file-explorer">Server Files</a>
+                                        <a class="dropdown-item" href="#" data-edit="--btn-delete-server">Delete Server</a>
+                                        <div role="separator" class="dropdown-divider"></div>
+                                        <a class="dropdown-item" href="#" data-edit="--btn-open-dir">Open Dir</a>
+                                        <a class="dropdown-item" href="#" data-edit="--btn-save-file">Save File</a>
+                                        <div role="separator" class="dropdown-divider"></div>
+                                        <a class="dropdown-item" href="#" data-edit="--btn-download-server">Download</a>
+                                      </div>
+                                      <div class="picker-button picker-group" data-color="--button-color"></div>
+                                    </div>
+                                </div>
+                                <div class="picker"  acp-show-rgb="no" acp-show-hsl="no" acp-show-hex="yes" acp-show-alpha></div>
+                            </div>
+
+                            <label class="form-label">Files</label>
+                            <div class="sidebar-column">
+                                <div class="input-group">
+                                    <div class="sidebar-row input-group-prepend">
+                                      <button id="btnDropdownfiles" class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Select File</button>
+                                      <div id="filesDropdown" class="dropdown-menu">
+                                        <a class="dropdown-item" href="#">File:hover</a>
+                                        <div role="separator" class="dropdown-divider"></div>
+                                        <a class="dropdown-item" href="#">Folders</a>
+                                        <a class="dropdown-item" href="#">Files</a>
+                                        <div role="separator" class="dropdown-divider"></div>
+                                        <a class="dropdown-item" href="#">.Jar Files</a>
+                                        <a class="dropdown-item" href="#">.prop Files</a>
+                                      </div>
+                                      <div class="picker-button picker-group" data-color="--button-color"></div>
+                                    </div>
+                                </div>
+                                <div class="picker"  acp-show-rgb="no" acp-show-hsl="no" acp-show-hex="yes" acp-show-alpha></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- handle application text -->
+                    <div class="sidebar-panel">
+
+                        <div class="sidebar-panel-header">
+                            <h5><i class="fas fa-text-width"></i> Text</h5>
+                            <a class="sidebar-panel-toggle"><i class="fas fa-arrow-down"></i></a>
+                        </div>
+
+                        <div class="sidebar-panel-body">
+                            <label class="form-label">Font-Size</label>
+                            <div class="sidebar-row">
+                                <input class="editor-input custom-input" value="10" maxlength="2">
+                                <input type="range" class="slider" value="10" min="10" max="20" step="1">
+                            </div>
+    
+                            <label class="form-label">Font-Weight</label>
+                            <div class="sidebar-row">
+                                <input class="editor-input custom-input" value="1" maxlength="3">
+                                <input type="range" class="slider" value="1" min="1" max="9" step="1">
+                            </div>
+    
+                            <label class="form-label">Font-Family</label>
+                            <div class="sidebar-row">
+                                <input class="editor-input custom-input" value="1" maxlength="2">
+                                <input type="range" class="slider" value="1" min="1" max="20" step="1">
+                            </div>
+    
+                            <label class="form-label">Font-Color</label>
+                            <div class="sidebar-row">
+                                <input class="sidebar-color" type="color">
+                            </div>
                         
-                        <label for="customRange1" class="form-label">Font-Size</label>
-                        <input type="range" class="form-range" id="customRange1">
+                            <label class="form-label">Text-Selection</label>
+                            <div class="sidebar-row">
+                                <input class="sidebar-color" type="color">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- handle other editing features -->
+                    <div class="sidebar-panel">
+                        <div class="sidebar-panel-header">
+                            <h5><i class="fas fa-icons"></i> Other</h5>
+                            <a class="sidebar-panel-toggle"><i class="fas fa-arrow-down"></i></a>
+                        </div>
+                        <div class="sidebar-panel-body">
+
+                            <label class="form-label">Buttons Hover Brightness</label>
+                            <div class="sidebar-row">
+                                <input class="editor-input custom-input" value="99" maxlength="2">
+                                <input type="range" data-edit="--button-hover" data-ext="%" class="slider" value="99" min="50" max="150" step="1">
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
