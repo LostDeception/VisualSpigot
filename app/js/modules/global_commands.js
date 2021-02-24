@@ -3,7 +3,7 @@
 // =========================================================
 var fs = require('fs-extra');
 var path = require('path');
-const { shell } = require('electron');
+const { ipcRenderer, shell } = require('electron');
 
 class GlobalCommands {
     constructor(handler) {
@@ -11,7 +11,6 @@ class GlobalCommands {
         this.input_auto_completion({
             '.donate': [],
             '.theme': [],
-            '.settings': [],
             '.help': [],
             '.info': [],
             '.rename': [],
@@ -22,10 +21,9 @@ class GlobalCommands {
             '.path': [],
             '.open': ['logs', 'plugins', 'permissions.yml', 'server.properties'],
             '.open logs': ['latest'],
+            '.zip': [],
             '.clear': [],
-            '.font': ['serif', 'cursive', 'monospace', 'comic sans'],
-            '.fontsize': ['14', '15', '16', '17', '18'],
-            '.fontcolor': ['darkseagreen', 'darkkhaki', 'darkcyan', 'lightblue', 'lightslategrey', 'lightsteelblue']
+            '.refresh': []
         });
     }
 
@@ -38,7 +36,6 @@ class GlobalCommands {
         let server = this.handler.getSelectedServer();
 
         switch(args[0]) {
-
             case 'donate':
                 shell.openExternal('https://www.paypal.com/donate?business=tmickelson93%40gmail.com&item_name=VisualSpigot+Donations&currency_code=USD');
                 break;
@@ -63,10 +60,9 @@ class GlobalCommands {
                 ".plugins: open server plugins folder\n" +
                 ".path: copy directory to clipboard\n" +
                 ".open \"file path\": open specified file via desktop\n" +
-                ".font \"font-family\": change font of the console\n" +
-                '.fontsize \"font-size\": change font size of the console\n' +
-                ".fontcolor \"font-color\": change the font color in the console\n" +
-                ".clear: clear server console");
+                ".zip: \"file name\": zip file to specified location\n" +
+                ".clear: clear server console\n",
+                ".refresh: refresh application");
                 break;
             case 'info':
                 server.sendCommand('.info');
@@ -179,25 +175,38 @@ class GlobalCommands {
                 }
                 
                 break;
+            
+            // zip currently selected server to desktop
+            case 'zip':
+                if(args[1]) {
+                    let server = this.handler.getSelectedServer();
+                    if(server) {
+                        let name = args[1].concat('.zip');
+                        ipcRenderer.send('zipLocation', name);
+                    }
+                }
+                break;
+                
             case 'clear':
                 if(server) {
                     server.console.innerHTML = '';
                 }
                 break;
 
-            case 'font':
-            case 'fontsize':
-            case 'fontcolor':
-                let value = args.slice(1).join(' ');
-                this.handler.updateVisuals(args[0], value);
-                break;
-
+            // toggle theme sidebar
             case 'theme':
                 this.handler.toggleThemeSideBar();
                 break;
 
-            case 'settings':
-                this.handler.toggleSettingsSideBar();
+            // refresh application
+            case 'refresh':
+                let isActiveServer = this.handler.activeServerCheck();
+                if(!isActiveServer) {
+                    location.reload();
+                } else {
+                    this.handler.notifier.alert('Cannot refresh while a server is active');
+                }
+                
                 break;
         }
     }
@@ -231,13 +240,7 @@ class GlobalCommands {
         var doc = document;
 
         // suggestion container
-        var container = doc.createElement("div");
-        container.classList.add('autocomplete', 'fadeIn');
-        container.style.userSelect = 'none';
-
-        // suggestion container style
-        var containerStyle = container.style;
-        containerStyle.position = 'absolute';
+        var container = doc.getElementById('auto-complete');
 
         // console input
         var input = this.handler.console_input;
@@ -334,7 +337,7 @@ class GlobalCommands {
             if(keyCode == 'Tab') { e.preventDefault(); }
 
             // check that container is being displayed
-            if(!!container.parentNode) {
+            if(container.style.display == 'block') {
 
                 // -- get selected element in suggestion container
                 let selected = doc.querySelector('.selected');
@@ -386,28 +389,22 @@ class GlobalCommands {
             }
         })
 
-        // -- if input loses focus than detach suggestion container
-        input.addEventListener('focusout', function() { 
-            detach(); 
+        input.addEventListener('focusout', function() {
+            //detach();
         })
 
         /**
         * Attach the container to DOM
         */
         function attach() {
-            if (!container.parentNode) {
-                doc.body.appendChild(container);
-            }
+            container.style.display = 'block';
         }
 
         /**
         * Detach the container from DOM
         */
         function detach() {
-            var parent = container.parentNode;
-            if (parent) {
-                parent.removeChild(container);
-            }
+            container.style.display = 'none';
         }
     }
 }

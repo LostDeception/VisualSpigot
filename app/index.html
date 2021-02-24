@@ -120,7 +120,7 @@
 
                                 <div class="tab-pane show active" id="home" role="tabpanel" aria-labelledby="manual-tab">
                                     <div id="file-drop-container">
-                                        <h6 id="file-drop-notify">drop server .jar file here</h6>
+                                        <h6 id="file-drop-notify">drop server .jar here</h6>
                                     </div>
                                 </div>
 
@@ -290,7 +290,7 @@
                                         <label id="fs-dir-text"></label>
 
                                         <!-- Notification to be displayed on file save -->
-                                        <p id="file-saved-notification" class="fadeOut" style="display: none;">Saved</p>
+                                        <p id="file-saved-notification" style="display: none;">Saved</p>
                                     </div>
                                 </div>
 
@@ -299,22 +299,6 @@
 
                                     <!-- search for files in directory -->
                                     <input id="file-list-search" class="custom-input" placeholder="Search..." spellcheck="false">
-
-                                    <!-- choose code editor theme -->
-                                    <div id="editor-theme" class="custom-dropdown" style="display: none;">
-                                        <button id="btn-dropdown-themes" class="dropbtn">Select A Theme</button>
-                                        <div id="dropdown-themes" class="dropdown-content scroller">
-                                            <a>darcula</a>
-                                            <a>dracula</a>
-                                            <a>ambiance</a>
-                                            <a>ayu-dark</a>
-                                            <a>hopscotch</a>
-                                            <a>mbo</a>
-                                            <a>moxer</a>
-                                            <a>nord</a>
-                                            <a>paraiso-dark</a>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
 
@@ -339,6 +323,8 @@
         <!-- application theme side bar -->
         <div id="theme-side-bar" class="sidebar">
             <a class="closebtn">&times;</a>
+            <a id="saveTheme"><i class="fas fa-save"></i></a>
+            <p id="saveThemeNotification" style="display: none;">Saved</p>
             <div class="sidebar-container">
                 <div class="sidebar-header">
                     <h4><i class="fas fa-paint-brush"></i> Editor</h4>
@@ -346,12 +332,22 @@
                 <div class="sidebar-body">
 
                     <!-- add,delete or apply theme -->
-                    <div class="sidebar-panel">
+                    <div id="themePanel" class="sidebar-panel">
                         <div class="sidebar-panel-header">
                             <h5><i class="fas fa-swatchbook"></i> Themes</h5>
                             <a class="sidebar-panel-toggle"><i class="fas fa-arrow-down"></i></a>
                         </div>
                         <div class="sidebar-panel-body">
+                            <div class="sidebar-column">
+                                <div class="input-group">
+                                    <input id="themeKeyInput" type="text" class="form-control" placeholder="Theme name" aria-label="Theme name" aria-describedby="basic-addon2">
+                                    <div class="input-group-append">
+                                      <button id="btnAddTheme" class="btn btn-secondary" type="button"><i class="fas fa-plus"></i></button>
+                                      <button id="btnThemeDir" class="btn btn-secondary" type="button"><i class="fas fa-folder"></i></button>
+                                    </div>
+                                </div>
+                                <div id="themeList" class="list-group"></div>
+                            </div>
                         </div>
                     </div>
 
@@ -366,58 +362,95 @@
                             <img id="btnBackgroundImage" src="./images/bground1.jpg"></img>
 
                             <label class="form-label">Background Opacity</label>
-                            <div class="sidebar-row">
-                                <input class="editor-input custom-input" value="0.3" maxlength="2">
-                                <input type="range" data-edit="--background-opacity" class="slider" value="0.3" min="0.1" max="1" step="0.1">
+                            <div id="bgOpacityContainer" class="sidebar-row">
+                                <input class="editor-input custom-input" value="0.2" maxlength="2" disabled>
+                                <input type="range" data-edit="--background-opacity" class="slider" value="0.2" min="0.1" max="1" step="0.1">
                             </div>
 
                             <label class="form-label">Background Blur</label>
-                            <div class="sidebar-row">
-                                <input class="editor-input custom-input" value="0" maxlength="2">
+                            <div id="bgBlurContainer" class="sidebar-row">
+                                <input class="editor-input custom-input" value="0" maxlength="3" disabled>
                                 <input type="range" data-edit="--background-blur" data-ext="px" class="slider" value="0" min="0" max="5" step="1">
+                            </div>
+
+                            <label class="form-label">Background Contrast</label>
+                            <div id="bgContrastContainer" class="sidebar-row">
+                                <input class="editor-input custom-input" value="99" maxlength="3" disabled>
+                                <input type="range" data-edit="--background-contrast" data-ext="%" class="slider" value="99" min="0" max="200" step="1">
+                            </div>
+
+                            <label class="form-label">Background Grayscale</label>
+                            <div id="bgGrayscaleContainer" class="sidebar-row">
+                                <input class="editor-input custom-input" value="0" maxlength="3" disabled>
+                                <input type="range" data-edit="--background-grayscale" data-ext="%" class="slider" value="0" min="0" max="100" step="1">
                             </div>
                         </div>
                     </div>
 
                     <!-- basic color palette for application -->
                     <div class="sidebar-panel">
-
                         <div class="sidebar-panel-header">
                             <h5><i class="fas fa-palette"></i> Colors</h5>
                             <a class="sidebar-panel-toggle"><i class="fas fa-arrow-down"></i></a>
                         </div>
 
                         <div class="sidebar-panel-body">
-                            
-                            <label class="form-label">Primary</label>
+                            <label class="form-label">General</label>
                             <div class="sidebar-column">
-                                <div class="picker-button" data-color="--primary-color"></div>
+                                <div class="input-group">
+                                    <div class="sidebar-row input-group-prepend">
+                                      <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Select Option</button>
+                                      <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="#" data-edit="--primary-color">Primary</a>
+                                        <a class="dropdown-item" href="#" data-edit="--accent-one">Accent #1</a>
+                                        <a class="dropdown-item" href="#" data-edit="--accent-two">Accent #2</a>
+                                        <a class="dropdown-item" href="#" data-edit="--scrollbar-color">Scrollbar</a>
+                                        <a class="dropdown-item" href="#" data-edit="--shadow-color">Shadow</a>
+                                      </div>
+                                      <div class="picker-button picker-group" data-color="--general-color"></div>
+                                    </div>
+                                </div>
                                 <div class="picker"  acp-show-rgb="no" acp-show-hsl="no" acp-show-hex="yes" acp-show-alpha></div>
                             </div>
-                            
-                            <label class="form-label">Accent</label>
+
+                            <label class="form-label">Server Dropdown</label>
                             <div class="sidebar-column">
-                                <div class="picker-button" data-color="--accent-color"></div>
-                                <div class="picker"  acp-show-rgb="no" acp-show-hsl="no" acp-show-hex="yes" acp-show-alpha></div>
+                                <div class="input-group">
+                                    <div class="sidebar-row input-group-prepend">
+                                      <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Select Option</button>
+                                      <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="#" data-edit="--dropdown-background">Background</a>
+                                        <a class="dropdown-item" href="#" data-edit="--dropdown-selection">Selection</a>
+                                        <div role="separator" class="dropdown-divider"></div>
+                                        <a class="dropdown-item" href="#" data-edit="--active-server">Active Icon</a>
+                                        <a class="dropdown-item" href="#" data-edit="--inactive-server">Inactive Icon</a>
+                                      </div>
+                                      <div class="picker-button picker-group"></div>
+                                    </div>
+                                </div>
+                                <div class="picker" data-type="dropdownpicker"  acp-show-rgb="no" acp-show-hsl="no" acp-show-hex="yes" acp-show-alpha></div>
                             </div>
-    
-                            <label class="form-label">Shadow</label>
+
+                            <label class="form-label">Auto-Complete</label>
                             <div class="sidebar-column">
-                                <div class="picker-button" data-color="--shadow-color"></div>
-                                <div class="picker"  acp-show-rgb="no" acp-show-hsl="no" acp-show-hex="yes" acp-show-alpha></div>
-                            </div>
-    
-                            <label class="form-label">Scrollbar</label>
-                            <div class="sidebar-column">
-                                <div class="picker-button" data-color="--scrollbar-color"></div>
-                                <div class="picker"  acp-show-rgb="no" acp-show-hsl="no" acp-show-hex="yes" acp-show-alpha></div>
+                                <div class="input-group">
+                                    <div class="sidebar-row input-group-prepend">
+                                      <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Select Option</button>
+                                      <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="#" data-edit="--auto-comp-background">Background</a>
+                                        <a class="dropdown-item" href="#" data-edit="--auto-comp-selection">Selection</a>
+                                      </div>
+                                      <div class="picker-button picker-group"></div>
+                                    </div>
+                                </div>
+                                <div class="picker" data-type="autocompicker" acp-show-rgb="no" acp-show-hsl="no" acp-show-hex="yes" acp-show-alpha></div>
                             </div>
 
                             <label class="form-label">Buttons</label>
                             <div class="sidebar-column">
                                 <div class="input-group">
                                     <div class="sidebar-row input-group-prepend">
-                                      <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Select Button</button>
+                                      <button class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Select Option</button>
                                       <div class="dropdown-menu">
                                         <a class="dropdown-item" href="#" data-edit="--btn-add-server">Add Server</a>
                                         <a class="dropdown-item" href="#" data-edit="--btn-start-server">Start</a>
@@ -428,6 +461,7 @@
                                         <a class="dropdown-item" href="#" data-edit="--btn-file-explorer">Server Files</a>
                                         <a class="dropdown-item" href="#" data-edit="--btn-delete-server">Delete Server</a>
                                         <div role="separator" class="dropdown-divider"></div>
+                                        <a class="dropdown-item" href="#" data-edit="--btn-back-dir">Back Dir</a>
                                         <a class="dropdown-item" href="#" data-edit="--btn-open-dir">Open Dir</a>
                                         <a class="dropdown-item" href="#" data-edit="--btn-save-file">Save File</a>
                                         <div role="separator" class="dropdown-divider"></div>
@@ -439,21 +473,28 @@
                                 <div class="picker"  acp-show-rgb="no" acp-show-hsl="no" acp-show-hex="yes" acp-show-alpha></div>
                             </div>
 
+                            <label class="form-label">Buttons:hover</label>
+                            <div id="btnHoverContainer" class="sidebar-row">
+                                <input class="editor-input custom-input" value="99" maxlength="2" disabled>
+                                <input type="range" data-edit="--button-hover" data-ext="%" class="slider" value="99" min="50" max="150" step="1">
+                            </div>
+
                             <label class="form-label">Files</label>
                             <div class="sidebar-column">
                                 <div class="input-group">
                                     <div class="sidebar-row input-group-prepend">
-                                      <button id="btnDropdownfiles" class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Select File</button>
+                                      <button id="btnDropdownfiles" class="btn btn-secondary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Select Option</button>
                                       <div id="filesDropdown" class="dropdown-menu">
-                                        <a class="dropdown-item" href="#">File:hover</a>
+                                        <a class="dropdown-item" href="#" data-edit="--file-hover">File:hover</a>
                                         <div role="separator" class="dropdown-divider"></div>
-                                        <a class="dropdown-item" href="#">Folders</a>
-                                        <a class="dropdown-item" href="#">Files</a>
+                                        <a class="dropdown-item" href="#" data-edit="--search-color">Search</a>
+                                        <a class="dropdown-item" href="#" data-edit="--folder-color">Folders</a>
+                                        <a class="dropdown-item" href="#" data-edit="--file-color">Files</a>
                                         <div role="separator" class="dropdown-divider"></div>
-                                        <a class="dropdown-item" href="#">.Jar Files</a>
-                                        <a class="dropdown-item" href="#">.prop Files</a>
+                                        <a class="dropdown-item" href="#" data-edit="--jar-color">.Jar Files</a>
+                                        <a class="dropdown-item" href="#" data-edit="--prop-color">.prop Files</a>
                                       </div>
-                                      <div class="picker-button picker-group" data-color="--button-color"></div>
+                                      <div class="picker-button picker-group" data-color="--file-color"></div>
                                     </div>
                                 </div>
                                 <div class="picker"  acp-show-rgb="no" acp-show-hsl="no" acp-show-hex="yes" acp-show-alpha></div>
@@ -470,54 +511,96 @@
                         </div>
 
                         <div class="sidebar-panel-body">
-                            <label class="form-label">Font-Size</label>
-                            <div class="sidebar-row">
-                                <input class="editor-input custom-input" value="10" maxlength="2">
-                                <input type="range" class="slider" value="10" min="10" max="20" step="1">
-                            </div>
-    
-                            <label class="form-label">Font-Weight</label>
-                            <div class="sidebar-row">
-                                <input class="editor-input custom-input" value="1" maxlength="3">
-                                <input type="range" class="slider" value="1" min="1" max="9" step="1">
-                            </div>
-    
-                            <label class="form-label">Font-Family</label>
-                            <div class="sidebar-row">
-                                <input class="editor-input custom-input" value="1" maxlength="2">
-                                <input type="range" class="slider" value="1" min="1" max="20" step="1">
-                            </div>
-    
+
                             <label class="form-label">Font-Color</label>
-                            <div class="sidebar-row">
-                                <input class="sidebar-color" type="color">
+                            <div class="sidebar-column">
+                                <div id="ftColor" class="picker-button" data-color="--font-color"></div>
+                                <div class="picker" acp-show-rgb="no" acp-show-hsl="no" acp-show-hex="yes" acp-show-alpha></div>
                             </div>
-                        
+
+                            <label class="form-label">Placeholder</label>
+                            <div class="sidebar-column">
+                                <div id="phColor" class="picker-button" data-color="--placeholder-color"></div>
+                                <div class="picker" acp-show-rgb="no" acp-show-hsl="no" acp-show-hex="yes" acp-show-alpha></div>
+                            </div>
+
                             <label class="form-label">Text-Selection</label>
-                            <div class="sidebar-row">
-                                <input class="sidebar-color" type="color">
+                            <div class="sidebar-column">
+                                <div id="textSelection" class="picker-button" data-color="--text-selection"></div>
+                                <div class="picker" acp-show-rgb="no" acp-show-hsl="no" acp-show-hex="yes" acp-show-alpha></div>
+                            </div>
+
+                            <label class="form-label">Input: Font-Color</label>
+                            <div class="sidebar-column">
+                                <div id="inputFontColor" class="picker-button" data-color="--input-font-color"></div>
+                                <div class="picker" acp-show-rgb="no" acp-show-hsl="no" acp-show-hex="yes" acp-show-alpha></div>
+                            </div>
+
+                            <label class="form-label">Button: Disabled</label>
+                            <div class="sidebar-column">
+                                <div id="btnTextDisabled" class="picker-button" data-color="--button-text-disabled"></div>
+                                <div class="picker" acp-show-rgb="no" acp-show-hsl="no" acp-show-hex="yes" acp-show-alpha></div>
+                            </div>
+
+                            <label class="form-label">Console: Font-Size</label>
+                            <div id="cFontSizeContainer" class="sidebar-row">
+                                <input class="editor-input custom-input" value="15" maxlength="2" disabled>
+                                <input type="range" data-edit="--console-font-size" data-ext="px" class="slider" value="15" min="10" max="25" step="1">
+                            </div>
+
+                            <label class="form-label">Console: Font-Color</label>
+                            <div class="sidebar-column">
+                                <div id="consoleFontColor" class="picker-button" data-color="--console-font-color"></div>
+                                <div class="picker" acp-show-rgb="no" acp-show-hsl="no" acp-show-hex="yes" acp-show-alpha></div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- handle other editing features -->
+                    <!-- handle application code editor -->
                     <div class="sidebar-panel">
+
                         <div class="sidebar-panel-header">
-                            <h5><i class="fas fa-icons"></i> Other</h5>
+                            <h5><i class="fas fa-code"></i> CodeEditor</h5>
                             <a class="sidebar-panel-toggle"><i class="fas fa-arrow-down"></i></a>
                         </div>
+
                         <div class="sidebar-panel-body">
 
-                            <label class="form-label">Buttons Hover Brightness</label>
-                            <div class="sidebar-row">
-                                <input class="editor-input custom-input" value="99" maxlength="2">
-                                <input type="range" data-edit="--button-hover" data-ext="%" class="slider" value="99" min="50" max="150" step="1">
+                            <!-- choose code editor theme -->
+                            <label class="form-label">Theme</label>
+                            <div class="dropdown show">
+                                <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                  Select Theme
+                                </a>
+                              
+                                <div id="themeMenu" class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                                  <a class="dropdown-item" href="#">darcula</a>
+                                  <a class="dropdown-item" href="#">dracula</a>
+                                  <a class="dropdown-item" href="#">ambiance</a>
+                                  <a class="dropdown-item" href="#">ayu-dark</a>
+                                  <a class="dropdown-item" href="#">hopscotch</a>
+                                  <a class="dropdown-item" href="#">mbo</a>
+                                  <a class="dropdown-item" href="#">moxer</a>
+                                  <a class="dropdown-item" href="#">nord</a>
+                                  <a class="dropdown-item" href="#">paraiso-dark</a>
+                                </div>
+                            </div>
+
+                            <!-- line numbers toggle -->
+                            <div class="sidebar-check form-check">
+                                <input data-value="display-line-numbers" class="sidebar-check-value form-check-input" type="checkbox" value="" id="flexCheckDefault">
+                                <label class="form-check-label" for="flexCheckDefault">
+                                    Line-Numbers
+                                </label>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- auto-complete container -->
+        <div id="auto-complete" class="autocomplete fadeIn"></div>
 
         <!-- Load main render script -->
         <script src="./js/render_main.js"></script>

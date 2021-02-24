@@ -46,7 +46,7 @@ if (!gotTheLock) {
         }
 
         // open dev panel
-        win.webContents.openDevTools();
+        //win.webContents.openDevTools();
 
         // load html file in browserwindow
         win.loadURL(url.format({
@@ -93,6 +93,30 @@ if (!gotTheLock) {
             ipcMain.on('mainAppClose', function() {
                 force_quit=true; 
                 app.quit();
+            })
+
+            // handle image select dialog
+            ipcMain.on('selectImage', function() {
+                dialog.showOpenDialog({
+                    filters: [
+                        { name: 'Images', extensions: ['jpg', 'png'] }
+                    ]
+                }).then(result => {
+                    if(!result.canceled) {
+                        win.webContents.send('image', result.filePaths[0]);
+                    }
+                })
+            })
+
+            // select .zip location
+            ipcMain.on('zipLocation', function(sender, name) {
+                dialog.showOpenDialog({
+                    properties: ['openDirectory'],
+                }).then(result => {
+                    if(!result.canceled) {
+                        win.webContents.send('zipLocated', result.filePaths[0], name);
+                    }
+                })
             })
         })
     })

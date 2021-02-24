@@ -41,7 +41,7 @@ class Server {
 
         // when server is starting
         this.handler.updateServerState(this, 'starting');
-        this.tab.childNodes[0].style.color = 'var(--lime)';
+        this.tab.childNodes[0].style.color = 'var(--active-server)';
         this.displayMessage('Server Starting...', 'var(--lime)', false, true);
         this.handler.btn_dropdown_servers.innerHTML = this.tab.innerHTML;
 
@@ -252,7 +252,7 @@ class Server {
         } else {
             this.handler.updateServerState(this, 'default');
         }
-        this.tab.childNodes[0].style.color = 'rgba(255, 255, 255, 0.5)';
+        this.tab.childNodes[0].style.color = 'var(--inactive-server)';
         if(this.handler.isSelectedServer(this)) {
             this.handler.btn_dropdown_servers.innerHTML = this.tab.innerHTML;
         }

@@ -1,6 +1,5 @@
 var store = require('store');
 const { shell } = require('electron');
-const AColorPicker = require('a-color-picker');
 
 class DomHandler {
     constructor() {
@@ -8,7 +7,7 @@ class DomHandler {
         this.introContainerDisplayed = false;
         this.mainContainerDisplayed = false;
 
-        clean(document.body)
+        clean(document.body);
 
         // initialize notification object
         this.notifier = new AWN({
@@ -19,9 +18,7 @@ class DomHandler {
         this.main_container = document.getElementById('main-container');
         this.logo_container = document.getElementById('logo-container');
 
-        /**
-         * add click event to the close sidebar buttons
-         */
+        // handle sidebar close button listeners
         let exitSidebar = document.getElementsByClassName('closebtn');
         Array.from(exitSidebar).forEach(btn => {
             btn.addEventListener('click', function() {
@@ -29,6 +26,8 @@ class DomHandler {
                 parent.style.width = '0';
                 parent.style.display = 'none';
                 self.main.style.marginRight = '0';
+                $('#add-server-container').css('min-width', '800px');
+                $('.modal-content').css('margin-right', '0px');
             })
         })
 
@@ -65,7 +64,6 @@ class DomHandler {
         this.file_list = document.getElementById('file-list');
         this.header_text = document.getElementById('fs-dir-text');
         this.btn_save_file = document.getElementById('btn-save-file');
-        this.save_file_notif = document.getElementById('file-saved-notification');
         this.editor_theme_dropdown = document.getElementById('editor-theme-dropdown');
 
         // handle file explorer search input
@@ -102,17 +100,15 @@ class DomHandler {
         }
 
         // when the server explorer modal closes focus input
+        $("#addServerModel").on("hidden.bs.modal", function () {
+            self.console_input.focus();
+        });
+
+        // when the server explorer modal closes focus input
         $("#serverFilesModal").on("hidden.bs.modal", function () {
             self.main_container.style.visibility = 'visible';
             self.console_input.focus();
         });
-
-
-        /**
-         * instantiate theme handler which
-         * will handle the theme editor
-         */
-        new ThemeHandler(this);
 
         function clean(node)
         {
@@ -137,8 +133,6 @@ class DomHandler {
 
         // get overlay element from DOM
         let overlay = document.getElementById('application-overlay');
-
-        // -- display server-download overlay
         overlay.childNodes[0].textContent = text;
         overlay.style.display = 'flex';
     }
@@ -147,6 +141,11 @@ class DomHandler {
         let overlay = document.getElementById('application-overlay');
         overlay.childNodes[0].textContent = '';
         overlay.style.display = 'none';
+    }
+
+    clear_input() {
+        this.console_input.value = '';
+        $('#auto-complete').css('display', 'none');
     }
 
     create_tab_item(server_name) {
@@ -161,6 +160,7 @@ class DomHandler {
         
         let tab_icon = document.createElement('i');
         tab_icon.classList.add('fas', 'fa-circle');
+        tab_icon.style.color = 'var(--inactive-server)';
 
         tab_item.append(tab_icon);
         tab_item.innerHTML += ' ' + server_name;
@@ -182,7 +182,7 @@ class DomHandler {
 
             // set selected tab-item border
             tab_item.style.color = 'rgb(209, 209, 214)';
-            tab_item.style.backgroundColor = 'var(--light-accent)';
+            tab_item.style.backgroundColor = 'var(--dropdown-selection)';
 
             // set selected item in main dropdown button
             self.btn_dropdown_servers.innerHTML = tab_item.innerHTML;
@@ -395,101 +395,14 @@ class DomHandler {
             sidebar.style.display = 'none';
             sidebar.style.width = '0';
             main.style.marginRight = '0';
+            $('.modal-content').css('margin-right', '0px');
         } else {
             sidebar.style.display = 'block';
             sidebar.style.width = '250px';
             main.style.marginRight = '250px';
+            $('#add-server-container').css('cssText', 'min-width: 900px !important');
+            $('.modal-content').css('margin-right', '250px');
         }
-    }
-}
-
-class ThemeHandler {
-    constructor(dom) {
-        this.dom = dom;
-        let self = this;
-
-        // handle when user clicks the sidebar panel toggle arrow
-        $('.sidebar-panel-header').on('click', function() {
-            let container = this.parentElement;
-            let body = this.parentElement.childNodes[1];
-            let arrow = this.childNodes[1].childNodes[0];
-            if ($(arrow).css('transform') == 'none') {
-                $(arrow).css({'transform': 'rotate(-180deg)'});
-                container.style.height = 'auto';
-                body.style.display = 'block';
-              } else {
-                $(arrow).css({'transform': ''});
-                container.style.height = '40px';
-                body.style.display = 'none';
-              };
-        })
-
-        // handle background image
-        let background = document.getElementsByClassName('background')[0];
-
-        let sliders = document.getElementsByClassName('slider');
-        Array.from(sliders).forEach(slider => {
-            let ext = slider.dataset.ext;
-            let text = slider.parentElement.childNodes[0];
-            slider.oninput = function() {
-                text.value = slider.value;
-                let value = this.value;
-                if(ext) {
-                    value = this.value.concat(ext)
-                }
-                document.documentElement.style.setProperty(slider.dataset.edit, value);
-            }
-        })
-
-        // Handle all color pickers
-        let pickerButtons = document.getElementsByClassName('picker-button');
-        Array.from(pickerButtons).forEach(btn => {
-            let picker = null;
-            let pickerContainer = null;
-            if(!btn.classList.contains('picker-group')) {
-                pickerContainer = btn.parentElement.childNodes[1];
-                picker = AColorPicker.from(pickerContainer);
-
-                picker.on('change', (picker, color) => {
-                    btn.style.backgroundColor = color;
-                    document.documentElement.style.setProperty(btn.dataset.color, color);
-                })
-            } else {
-                pickerContainer = btn.parentElement.parentElement.parentElement.childNodes[1];
-                let pickerDropdownButton = btn.parentElement.childNodes[0];
-                let pickerDropdown = btn.parentElement.childNodes[1];
-                picker = AColorPicker.from(pickerContainer);
-
-                let selectedItem = null;
-                $(pickerDropdown).find('a').on('click', (e) => {
-                    selectedItem = e.target;
-                    pickerDropdownButton.innerHTML = selectedItem.innerHTML;
-                    let color = getComputedStyle(document.documentElement).getPropertyValue(selectedItem.dataset.edit).trim();
-                    picker[0].setColor(color);
-                })
-
-                picker.on('change', (picker, color) => {
-                    if(selectedItem) {
-                        btn.style.backgroundColor = color;
-                        document.documentElement.style.setProperty(selectedItem.dataset.edit, color);
-                    }
-                })
-            }
-            
-            btn.addEventListener('click', function() {
-                picker[0].toggle();
-            })
-
-            picker[0].hide();
-        });
-    }
-
-    rgb2hex(rgb){
-        rgb = rgb.match(/^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i);
-        return (rgb && rgb.length === 4) ? "#" +
-         ("0" + parseInt(rgb[1],10).toString(16)).slice(-2) +
-         ("0" + parseInt(rgb[2],10).toString(16)).slice(-2) +
-         ("0" + parseInt(rgb[3],10).toString(16)).slice(-2) : '';
     }
 }
 

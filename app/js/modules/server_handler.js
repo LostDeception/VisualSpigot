@@ -4,11 +4,14 @@
 var fs = require('fs-extra');
 var path = require('path');
 var download = require('download-file');
+var compressing = require('compressing');
 const Server = require('@modules/server_process');
 const Events = require('@modules/events');
 const GlobalCommands = require('@modules/global_commands');
 const ServerHelpers = require('@modules/server_helpers');
 const ServerExplorer = require('@modules/server_explorer');
+const ThemeHandler = require('@modules/theme_handler');
+const { ipcRenderer } = require('electron');
 
 class ServerHandler extends ServerHelpers {
     
@@ -20,8 +23,8 @@ class ServerHandler extends ServerHelpers {
          * for in house testing path.join(__dirname, '../../../minecraft_servers');
         */
         let userDataPath = process.env.APPDATA || (process.platform == 'darwin' ? process.env.HOME + '/Library/Preferences' : process.env.HOME + "/.local/share");
-        let nativeDirectory = path.join(userDataPath, 'VisualSpigot', 'minecraft_servers');
-        this.nativeDir = nativeDirectory;
+        this.appDataPath = path.join(userDataPath, 'VisualSpigot');
+        this.nativeDir =  path.join(this.appDataPath, 'minecraft_servers');
 
         // handle all application events
         this.events = new Events();
@@ -32,6 +35,9 @@ class ServerHandler extends ServerHelpers {
         // handle global command functions
         this.gCommand = new GlobalCommands(this);
 
+        // handle application theme
+        this.theme = new ThemeHandler(this);
+
         /**
          * get all server files in nativeDirectory
          */
@@ -40,6 +46,22 @@ class ServerHandler extends ServerHelpers {
             this.downloadServerHandler();
             this.serverDropHandler();
             this.add_plugin_handler();
+        })
+
+
+        // handle server zip
+        let self = this;
+        ipcRenderer.on('zipLocated', function(sender, dir, name) {
+            let destination = path.join(dir, name);
+            let server = self.getSelectedServer();
+            compressing.tar.compressDir(server.directory, destination)
+            .then(() => {
+                self.notifier.success(name + ' Successfully Compressed')
+            })
+            .catch((err) => {
+                console.log(err);
+                self.notifier.alert(err.toString());
+            });
         })
     }
 
@@ -50,7 +72,6 @@ class ServerHandler extends ServerHelpers {
 
         // initialize stored object for updating visuals
         this.initialize_ui_object();
-
 
         this.btn_add_server.addEventListener('click', function() {
             $('#addServerModel').modal();
@@ -160,6 +181,7 @@ class ServerHandler extends ServerHelpers {
         })
 
         this.btn_server_files.addEventListener('click', function() {
+            self.clear_input();
             let server = self.getSelectedServer();
             self.baseDir = server.directory;
             self.sExplorer.generateFileList(server.directory);
@@ -180,34 +202,36 @@ class ServerHandler extends ServerHelpers {
             this.initializeDragDrop(drop_container, (e) => {
                 let file = e.files[0];
                 if (file) {
-
                     if (e.types == "Files") {
-                        self.create_server_folder(self.nativeDir, file.name, function (folder_dir) {
-                            if (folder_dir) {
-                                let s_dir = path.join(folder_dir, file.name);
+                        let fileExt = path.extname(file.name);
+                        if(fileExt == '.jar') {
+                            self.create_server_folder(self.nativeDir, file.name, function (folder_dir) {
+                                if (folder_dir) {
+                                    let s_dir = path.join(folder_dir, file.name);
+    
+                                    // -- copy dropped file to server folder
+                                    fs.copyFile(file.path, s_dir, function (err) {
 
-                                // -- copy dropped file to server folder
-                                fs.copyFile(file.path, s_dir, function (err) {
+                                        if (err) {
+                                            $('#addServerModel').modal('hide');
+                                            self.notifier.alert(err.toString());
+                                            return;
+                                        }
 
-                                    if (err) {
                                         $('#addServerModel').modal('hide');
-                                        self.notifier.alert(err.toString());
-                                        return;
-                                    }
 
-                                    $('#addServerModel').modal('hide');
-
-                                    self.populate_servers(() => {
-                                        let server = self.servers.filter(s => s.directory == folder_dir)[0];
-                                        server.displayMessage(server.name + ' successfully added. type \".help\" for a list of commands!', null, false, true);
-                                        self.click_element(server.tab);
+                                        self.populate_servers(() => {
+                                            let server = self.servers.filter(s => s.directory == folder_dir)[0];
+                                            server.displayMessage(server.name + ' successfully added. type \".help\" for a list of commands!', null, false, true);
+                                            self.click_element(server.tab);
+                                        })
                                     })
-                                })
-                            } else {
-                                $('#addServerModel').modal('hide');
-                                self.notifier.alert('Failed to create server folder');
-                            }
-                        })
+                                } else {
+                                    $('#addServerModel').modal('hide');
+                                    self.notifier.alert('Failed to create server folder');
+                                }
+                            })
+                        }
                     }
                 }
             })

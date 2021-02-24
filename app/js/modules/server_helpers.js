@@ -94,6 +94,15 @@ class ServerHelpers extends DomHandler {
 
 
     // manage selected currently selected server
+    activeServerCheck() {
+        let check = false;
+        this.servers.forEach(server => {
+            if(server.isActive) {
+                check = true;
+            }
+        })
+        return check;
+    }
     getSelectedServer() {
         return this.server;
     }
@@ -347,6 +356,23 @@ class ServerHelpers extends DomHandler {
         return array.filter(f => f.includes(searchString))[0];
     }
 
+    // remove index from array
+    removeFromArray(array, value) {
+        let index = array.indexOf(value);
+        array.splice(index, 1);
+    }
+
+    // return a random string from given length
+    randomString(length) {
+        var result = '';
+        var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        var charactersLength = characters.length;
+        for ( var i = 0; i < length; i++ ) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        return result;
+    }
+
 
 
     // GENERAL APPLICATION HELPERS
@@ -421,6 +447,11 @@ class ServerHelpers extends DomHandler {
         })
     }
 
+    // return base64 image buffer
+    getEncodedImage(dir) {
+        return fs.readFileSync(dir, { encoding: 'base64' });
+    }
+
 
     // FILE HANDLER FUNCTIONS
     createFile(filePath, data, callback) {
@@ -429,9 +460,14 @@ class ServerHelpers extends DomHandler {
                 if(err) {
                     this.notifier.alert(err.toString());
                     console.log(err);
-                    callback(err);
+
+                    if(callback) {
+                        callback(err);
+                    }
                 } else {
-                    callback();
+                    if(callback) {
+                        callback();
+                    }
                 }
             })
         }
@@ -444,7 +480,9 @@ class ServerHelpers extends DomHandler {
                     this.notifier.alert(err.toString());
                     console.log(err);
                 } else {
-                    callback();
+                    if(callback) {
+                        callback();
+                    }
                 }
             })
         }
@@ -596,7 +634,9 @@ class ServerHelpers extends DomHandler {
                     console.log(err);
                 }
 
-                setTimeout(() => { callback(); }, 1500);
+                if(callback) {
+                    setTimeout(() => { callback(); }, 1500);
+                }
             })
         } else {
             this.notifier.alert('Files already exist sh-cf');

@@ -30,8 +30,13 @@ class ServerExplorer {
     this.editor = null;
 
     // set default editor theme
-    if (!store.get("editor-theme")) {
+    if (store.get("editor-theme") == undefined) {
       store.set("editor-theme", "darcula");
+    }
+
+    // set default line numbers
+    if(store.get("display-line-numbers") == undefined) {
+      store.set("display-line-numbers", true);
     }
 
     // navigates back a directory
@@ -59,7 +64,6 @@ class ServerExplorer {
         let data = self.editor.getValue();
         if (data != undefined && data != "") {
           savingFile = true;
-          self.handler.save_file_notif.style.display = "none";
 
           // rename .jar to server file name for user before saving
           if (path.basename(self.currentDir) == "run.bat") {
@@ -76,7 +80,10 @@ class ServerExplorer {
               return;
             }
 
-            self.handler.save_file_notif.style.display = "block";
+            $('#file-saved-notification').css('display', 'block').fadeOut('slow', function() {
+              this.style.display = 'none';
+            });
+
             savingFile = false;
           });
         }
@@ -95,43 +102,6 @@ class ServerExplorer {
         });
       }
     });
-
-    // add listener to theme buttons
-    this.editorThemes = document.getElementById("editor-theme");
-    let btnTheme = document.getElementById("btn-dropdown-themes");
-    let themeDrop = document.getElementById("dropdown-themes");
-    let allThemeButtons = Array.from(themeDrop.childNodes);
-    allThemeButtons.forEach((btn) => {
-      // set selected tab-item border
-      if (btn.textContent == store.get("editor-theme")) {
-        btn.style.color = "rgb(209, 209, 214)";
-        btn.style.backgroundColor = "rgba(72, 76, 82, 0.87)";
-        btnTheme.innerHTML = "Theme (" + btn.textContent + ")";
-      }
-
-      btn.addEventListener("click", function () {
-        let btnText = btn.textContent;
-
-        // reset colors of all tab_items
-        allThemeButtons.forEach((element) => {
-          element.style.color = "rgba(255, 255, 255, 0.5)";
-          element.style.backgroundColor = "transparent";
-        });
-
-        // set selected tab-item border
-        btn.style.color = "rgb(209, 209, 214)";
-        btn.style.backgroundColor = "rgba(72, 76, 82, 0.87)";
-
-        // set selected item in main dropdown button
-        btnTheme.innerHTML = "Theme (" + btnText + ")";
-
-        // set new editor theme to be stored
-        store.set("editor-theme", btnText);
-
-        // re-generate file with theme
-        self.generateFileList(self.currentDir);
-      });
-    });
   }
 
   /**
@@ -141,6 +111,10 @@ class ServerExplorer {
   generateFileList(directory) {
     // reference class for use inside event handlers
     var self = this;
+
+    if(directory == null) {
+      directory = this.currentDir;
+    }
 
     // get access to currently selected server
     this.handler.server_access((server) => {
@@ -166,16 +140,13 @@ class ServerExplorer {
           this.handler.file_list.style.border = "0.5px solid transparent";
 
           // reset save file notification animation and hide main container
-          this.handler.save_file_notif.style.display = "none";
           this.handler.main_container.style.visibility = "hidden";
 
           // check if the path to search is a directory
           if (dirInfo.isDirectory()) {
+
             // elements to hide when inside directory
             this.handler.btn_save_file.style.display = "none";
-
-            // hide code editor theme dropdown
-            this.editorThemes.style.display = "none";
 
             // elements to display when inside directory
             this.handler.input_file_search.style.display = "block";
@@ -321,7 +292,6 @@ class ServerExplorer {
       this.setHeaderText(filePath);
 
       // reset save file notification animation and hide main container
-      this.handler.save_file_notif.style.display = "none";
       this.handler.main_container.style.visibility = "hidden";
 
       // clear file list
@@ -333,9 +303,6 @@ class ServerExplorer {
 
       // elements to hide while inside file
       this.handler.input_file_search.style.display = "none";
-
-      // display code editor theme dropdown
-      this.editorThemes.style.display = "block";
 
       // set the current directory to the file path given
       this.currentDir = filePath;
@@ -361,7 +328,7 @@ class ServerExplorer {
 
           self.editor = CodeMirror.fromTextArea(content, {
             mode: "yaml",
-            lineNumbers: true,
+            lineNumbers: store.get("display-line-numbers"),
             theme: store.get("editor-theme"),
             cursorHeight: 0.85,
             extraKeys: {

@@ -1,6 +1,6 @@
 {
   "name": "VisualSpigot",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "",
   "main": "app/js/main.js",
   "scripts": {
@@ -37,6 +37,8 @@
     "awesome-notifications": "^3.1.1",
     "bootstrap": "^4.5.3",
     "codemirror": "^5.59.1",
+    "compressing": "^1.5.1",
+    "crypto-js": "^4.0.0",
     "download-file": "^0.1.5",
     "electron-updater": "^4.3.5",
     "fs-extra": "^9.1.0",
