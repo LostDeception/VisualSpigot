@@ -16,17 +16,17 @@ if (!gotTheLock) {
     app.quit()
 } else {
     app.on('second-instance', (event, commandLine, workingDirectory) => {
-      // Someone tried to run a second instance, we should focus our window.
-      if (win) {
-        if (win.isMinimized()) win.restore()
-        win.focus()
-      }
+        // Someone tried to run a second instance, we should focus our window.
+        if (win) {
+            if (win.isMinimized()) win.restore()
+            win.focus()
+        }
     })
-  
-    async function createWindow() {
 
-        // window options
-        let options = {
+    function createWindow() {
+
+        // -- create the browser window
+        win = new BrowserWindow({
             show: false,
             minWidth: 1000,
             minHeight: 650,
@@ -34,119 +34,110 @@ if (!gotTheLock) {
             webPreferences: {
                 nodeIntegration: true
             }
-        };
+        });
 
-        // -- create the browser window
-        win = new BrowserWindow(options);
-
-        // get app cache size.. if cache is greater than 100000 bytes clear
-        let result = await win.webContents.session.getCacheSize();
-        if(result > 1000000) {
-            await win.webContents.session.clearCache();
-        }
-
-        // open dev panel
-        //win.webContents.openDevTools();
+        let indexPath = path.join(__dirname, '../index.html');
+        var indexURL = url.format({
+            pathname: indexPath,
+            protocol: 'file:',
+            slashes: true
+        })
 
         // load html file in browserwindow
-        win.loadURL(url.format({
-            pathname: path.join(__dirname, '../index.html'),
-            protocol: 'file:', 
-            slashes: true
-        }));
-    }
-    
-    app.on('window-all-closed', function(){
-        if(process.platform != 'darwin')
-            app.quit();
-    });
- 
-    // when the application is ready to be displayed
-    app.whenReady().then(() => {
-        resourceFolderCheck(true, async() => {
-    
-            // by default set application menu to null
-            Menu.setApplicationMenu(null);
+        win.loadURL(indexURL).then(() => {
+            win.show();
 
-            // check for updates
-            autoUpdater.checkForUpdates();
-    
-            // create main window
-            await createWindow();
-    
-            // when DOM finished loading display window
-            win.once('ready-to-show', function() {
-                win.show();
-            });
-    
             // continue to handle mainWindow "close" event here
-            win.on('close', function(e){
-                if(!force_quit) {
+            win.on('close', function (e) {
+                if (!force_quit) {
                     e.preventDefault();
 
                     // handle any tasks before application exit
                     win.webContents.send("renderAppClose");
                 }
             });
-    
+
+        }).catch(err => {
+            console.log(err)
+        });
+    }
+
+    app.on('window-all-closed', function () {
+        if (process.platform != 'darwin')
+            app.quit();
+    });
+
+    // when the application is ready to be displayed
+    app.whenReady().then(() => {
+        resourceFolderCheck(true, () => {
+
+            // by default set application menu to null
+            Menu.setApplicationMenu(null);
+
+            // check for updates
+            //autoUpdater.checkForUpdates();
+
+            // create main window
+            createWindow();
+
             // after all tasks have been handled quit the application
-            ipcMain.on('mainAppClose', function() {
-                force_quit=true; 
+            ipcMain.on('mainAppClose', function () {
+                force_quit = true;
                 app.quit();
             })
 
             // handle image select dialog
-            ipcMain.on('selectImage', function() {
+            ipcMain.on('selectImage', function () {
                 dialog.showOpenDialog({
                     filters: [
                         { name: 'Images', extensions: ['jpg', 'png'] }
                     ]
                 }).then(result => {
-                    if(!result.canceled) {
+                    if (!result.canceled) {
                         win.webContents.send('image', result.filePaths[0]);
                     }
                 })
             })
 
             // select .zip location
-            ipcMain.on('zipLocation', function(sender, name) {
+            ipcMain.on('zipLocation', function (sender, name) {
                 dialog.showOpenDialog({
                     properties: ['openDirectory'],
                 }).then(result => {
-                    if(!result.canceled) {
+                    if (!result.canceled) {
                         win.webContents.send('zipLocated', result.filePaths[0], name);
                     }
                 })
             })
         })
     })
-    
+
     // if servers folder does not exist create it
     function resourceFolderCheck(production, callback) {
-    
-        if(production) {
+
+        if (production) {
             // let exePath = path.dirname (app.getPath ('exe'));
             let yourDbRootPath = app.getPath('userData');
             let dir = path.join(yourDbRootPath, 'minecraft_servers');
-    
-            if(!fs.existsSync(dir)) {
+
+            if (!fs.existsSync(dir)) {
                 fs.mkdir(dir, (err) => {
-                    if(err) {
+                    if (err) {
                         dialog.showMessageBox(win, {
                             message: dir
                         }).then(() => {
                             app.quit();
                         })
-    
-                        
+
+
                     } else {
                         callback();
                     }
                 })
             }
-    
+
             callback();
-    
+
         } else {
             callback();
         }
@@ -166,17 +157,17 @@ if (!gotTheLock) {
         // Send status to renderer
         //sendStatusToWindow("update-downloading");
     });
-    
+
     //--[update downloaded]
     autoUpdater.on("update-downloaded", (event, releaseNotes, releaseName) => {
         sendStatusToWindow("update-ready");
     });
-    
+
     //--[Download update]
     ipcMain.once("install-update", (event, arg) => {
         autoUpdater.quitAndInstall();
     });
-    
+
     //--[update error]
     autoUpdater.on("error", (err) => {
         //sendStatusToWindow("update-error");
