@@ -7,10 +7,10 @@ You can have as many servers as you want and access each of them within the same
 if there are any bugs or if you need assistance LostDeception#8132.
 
 <a href="https://www.spigotmc.org/resources/visual-spigot.87912/" align="left">
-    <img src="images/image1.png" alt="Logo" width="500" height="375">
-    <img src="images/image2.png" alt="Logo" width="500" height="375">
-    <img src="images/image3.png" alt="Logo" width="500" height="375">
-    <img src="images/image4.png" alt="Logo" width="500" height="375">
+    <img src="images/image1.png" alt="Logo" width="300" height="190">
+    <img src="images/image2.png" alt="Logo" width="300" height="190">
+    <img src="images/image3.png" alt="Logo" width="300" height="190">
+    <img src="images/image4.png" alt="Logo" width="300" height="190">
 </a>
 
 ### Built With
