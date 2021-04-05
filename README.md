@@ -19,7 +19,7 @@ if there are any bugs or if you need assistance LostDeception#8132.
 * [Javascript](https://www.w3schools.com/js)
 * [HTML, CSS](https://www.w3schools.com/html)
 * [Bootstrap](https://getbootstrap.com)
-* [Jquery](https://jquery.com)
+* [JQuery](https://jquery.com)
 
 ## Download Link
 
