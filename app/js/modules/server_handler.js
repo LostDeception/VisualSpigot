@@ -418,9 +418,6 @@ class ServerHandler extends ServerHelpers {
                             
                             // if files contain .jar file
                             if(jarFile) {
-                                
-                                // check if vsc plugin exists and if not copy it
-                                self.copyVSCPlugin(directory);
     
                                 // if server directory does not contain run.bat file create it
                                 if(!batFile) {

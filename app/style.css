@@ -234,6 +234,10 @@ img {
 .overlay div {
   width: 60%;
 }
+.overlay label {
+  margin-bottom: 8px;
+  color: rgb(220, 220, 220);
+}
 
 /* main server management container */
 #main-container {
@@ -492,6 +496,7 @@ img {
     "Helvetica Neue", Arial, sans-serif;
   margin: 0 0 5px 5px;
   padding: 5px;
+  color: var(--font-color);
   background-color: var(--auto-comp-background);
   border: 1px solid var(--accent-one);
   z-index: 995;
@@ -1019,6 +1024,12 @@ img {
 }
 
 /* CUSTOM POPUP NOTIFICATION STYLES */
+.awn-popup-title {
+  color: #d3d3d3 !important;
+}
+.awn-popup-content {
+  color: white !important;
+}
 .awn-popup-body {
   background-color: var(--medium-grey) !important;
 }

@@ -311,34 +311,6 @@ class ServerHelpers extends DomHandler {
         }
     }
 
-    // if vsc plugin does not exist than copy from resource folder
-    copyVSCPlugin(dir) {
-
-        // first create plugin folder if needed
-        this.createPluginFolder(dir);
-
-        // OLD VERSION TO REPLACE
-        /**
-            let old = path.join(dir, 'plugins', 'vsc.jar');
-            if(fs.existsSync(old)) {
-                this.deleteFile(old);
-            }
-        */
-
-        // get path to vsc.jar
-        let to = path.join(dir, 'plugins', 'vsc-v1.0.8.jar');
-        
-        if(!fs.existsSync(to)) {
-            let from = path.join(process.resourcesPath, 'plugins', 'vsc-v1.0.8.jar');
-            fs.copy(from, to, err => {
-                if(err) {
-                    this.notifier.alert(err.toString());
-                    console.log(err);
-                }
-            })
-        }
-    }
-
     /**
      * if there is an error creating a server
      * remove all pre-existing files related to the server

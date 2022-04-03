@@ -404,6 +404,14 @@ class DomHandler {
             $('.modal-content').css('margin-right', '250px');
         }
     }
+
+    /**
+     * Display all available minecraft 
+     * servers for download
+     */
+    downloadableServers() {
+
+    }
 }
 
 module.exports = DomHandler;

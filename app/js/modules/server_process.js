@@ -105,7 +105,6 @@ class Server {
 
     /**
      * get data line by line and
-     * check for vsc commands. If not a command
      * print the line to the console.
      * @param {*} data
      */

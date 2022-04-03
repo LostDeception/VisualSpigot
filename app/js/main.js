@@ -32,7 +32,8 @@ if (!gotTheLock) {
             minHeight: 650,
             icon: path.join(__dirname, '../images/icon.ico'),
             webPreferences: {
-                nodeIntegration: true
+                nodeIntegration: true,
+                contextIsolation: false
             }
         });
 
@@ -42,6 +43,8 @@ if (!gotTheLock) {
             protocol: 'file:',
             slashes: true
         })
+
+        //win.webContents.openDevTools();
 
         // load html file in browserwindow
         win.loadURL(indexURL).then(() => {
@@ -75,7 +78,7 @@ if (!gotTheLock) {
             Menu.setApplicationMenu(null);
 
             // check for updates
-            //autoUpdater.checkForUpdates();
+            autoUpdater.checkForUpdates();
 
             // create main window
             createWindow();

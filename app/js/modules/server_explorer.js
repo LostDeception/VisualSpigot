@@ -21,7 +21,7 @@ class ServerExplorer {
       ".log",
       ".bat",
     ];
-    this.excludedFiles = ["eula.txt", "vsc-v1.0.8.jar"];
+    this.excludedFiles = ["eula.txt"];
 
     this.baseDir = "";
     this.currentDir = "";

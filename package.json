@@ -1,6 +1,6 @@
 {
   "name": "VisualSpigot",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "",
   "main": "app/js/main.js",
   "scripts": {
@@ -19,7 +19,11 @@
     },
     "extraResources": [
       "./plugins/**"
-    ]
+    ],
+    "directories": {
+      "buildResources": "resources",
+      "output": "release"
+  }
   },
   "repository": {
     "type": "git",
@@ -28,7 +32,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^10.2.0"
+    "electron": "^18.0.1"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.2",
@@ -41,6 +45,7 @@
     "crypto-js": "^4.0.0",
     "download-file": "^0.1.5",
     "electron-updater": "^4.3.5",
+    "fs": "^0.0.1-security",
     "fs-extra": "^9.1.0",
     "jquery": "^3.5.1",
     "mcmotdparser": "^1.2.3",
