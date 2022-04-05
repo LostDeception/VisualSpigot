@@ -84,7 +84,6 @@
 html,
 body,
 #main {
-  width: 100%;
   height: 100%;
   margin: 0;
   padding: 0;
@@ -528,6 +527,7 @@ img {
   background-color: var(--file-hover) !important;
 }
 .list-group-item {
+  color: white;
   border-color: var(--dark-accent);
   background-color: transparent;
   box-shadow: none;
@@ -542,6 +542,9 @@ img {
 .list-group-item:focus {
   background-color: transparent;
 }
+.list-group-item:hover {
+  color: white;
+}
 
 /* BOOTSTRAP TAB STYLES */
 .nav-link {
@@ -554,8 +557,12 @@ img {
 .nav-link,
 .nav-link:hover {
   border-top: none !important;
+  border-bottom: none !important;
   border-left: none !important;
   border-right: 1px solid var(--accent-one) !important;
+}
+.nav-link:hover {
+  background-color: var(--dark-accent) !important;
 }
 .nav-link.active {
   font-weight: 500;
@@ -715,7 +722,7 @@ img {
   display: none;
 }
 #theme-side-bar h5 {
-  margin: 10px 0px 5px 0px;
+  padding: 5px;
 }
 #themePanel {
   border: 1px solid transparent;
@@ -780,12 +787,14 @@ img {
   display: flex;
   align-items: center;
   color: var(--white);
+  background-color: rgb(37, 37, 37);;
   padding-left: 15px;
   border-bottom: 1px solid var(--medium-grey);
 }
 .sidebar-body {
   height: 100%;
   color: #818181;
+  background-color: rgba(37, 37, 37, 0.7);
   padding: 5px;
   overflow: hidden;
   overflow-y: auto;
@@ -914,10 +923,10 @@ img {
   outline: none !important;
   box-shadow: none !important;
   border: none !important;
-  background-color: rgba(85, 95, 121, 0.603) !important;
+  background-color: rgba(60, 60, 60, 0.6) !important;
 }
 .btn-group > a.list-group-item:hover {
-  background-color: rgba(97, 109, 138, 0.603) !important;
+  background-color: rgba(60, 60, 60, 0.6) !important;
 }
 
 /* BOOTSTRAP MODAL STYLES */

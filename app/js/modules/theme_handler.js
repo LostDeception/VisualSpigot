@@ -304,7 +304,7 @@ class ThemeHandler {
             let p = path.join(this.themePath, name.concat('.txt'));
             if(!fs.existsSync(p)) {
                 this.handler.createFile(p, themeKey);
-                //this.appendToList(name);
+                this.appendToList(name);
             } else {
                 this.handler.notifier.alert('Theme already exists')
             }
@@ -320,7 +320,8 @@ class ThemeHandler {
         })
 
         let textToEncrypt = unEncryptedKey.join(':');
-        let encryptedKey = CryptoJS.AES.encrypt(textToEncrypt, this.passphrase);
+        let encryptedKey = String(CryptoJS.AES.encrypt(textToEncrypt, this.passphrase));
+        console.log(encryptedKey)
         return encryptedKey;
     }
 
