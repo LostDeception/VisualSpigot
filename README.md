@@ -1,10 +1,10 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-If you are new to Minecraft plugin development or a seasoned developer you will find this application very useful. 
-VisualSpigot comes with a unique and beautifully designed interface for starting local Minecraft servers. 
-You can have as many servers as you want and access each of them within the same window. Message me on discord 
-if there are any bugs or if you need assistance LostDeception#8132.
+Whether you're a novice or an experienced Minecraft plugin developer, VisualSpigot promises to be an invaluable tool. 
+With its distinctive and aesthetically pleasing interface, this application simplifies the process of launching local 
+Minecraft servers. Enjoy the convenience of managing multiple servers seamlessly within a single window. For any inquiries, 
+bug reports, or assistance, feel free to reach out to me on Discord at LostDeception#8132.
 
 <a href="https://www.spigotmc.org/resources/visual-spigot.87912/" align="left">
     <img src="images/image1.png" alt="Logo" width="350" height="215">
