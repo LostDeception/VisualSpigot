@@ -34,13 +34,6 @@ For any inquiries, bug reports, or assistance, feel free to reach out on Discord
 - **Real-Time Monitoring:** Keep track of your server’s performance and status with real-time updates and alerts.
 - **Cross-Platform Compatibility:** Available on Windows, macOS, and Linux, ensuring a consistent experience across all platforms.
 
-<div align="center">
-    <a href="https://www.spigotmc.org/resources/visual-spigot.87912/">
-        <img src="images/feature1.png" alt="VisualSpigot Feature 1" width="350" height="215">
-        <img src="images/feature2.png" alt="VisualSpigot Feature 2" width="350" height="215">
-    </a>
-</div>
-
 ## 🎥 Demonstration Videos
 
 Check out the following videos to see VisualSpigot in action:
