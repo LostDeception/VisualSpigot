@@ -20,11 +20,11 @@ For any inquiries, bug reports, or assistance, feel free to reach out on Discord
 
 ### 🛠️ Built With
 
-- ![ElectronJS](https://img.shields.io/badge/ElectronJS-47848F?style=flat-square&logo=electron&logoColor=white) [ElectronJS](https://www.electronjs.org/) - The backbone of the application, providing a seamless cross-platform desktop experience.
-- ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black) [JavaScript](https://www.javascript.com/) - Handles the core functionality and interactive elements of the application.
-- ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white) ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white) [HTML, CSS](https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/HTML5) - Provides the structure and styling, creating a user-friendly and visually appealing interface.
-- ![Bootstrap](https://img.shields.io/badge/Bootstrap-563D7C?style=flat-square&logo=bootstrap&logoColor=white) [Bootstrap](https://getbootstrap.com) - Powers the responsive design and layout, ensuring the application looks great on any screen size.
-- ![JQuery](https://img.shields.io/badge/jQuery-0769AD?style=flat-square&logo=jquery&logoColor=white) [JQuery](https://jquery.com) - Enhances the user interface with smooth animations and dynamic content updates.
+- ![ElectronJS](https://img.shields.io/badge/ElectronJS-47848F?style=flat-square&logo=electron&logoColor=white) - The backbone of the application, providing a seamless cross-platform desktop experience.
+- ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=black) - Handles the core functionality and interactive elements of the application.
+- ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white) ![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white) - Provides the structure and styling, creating a user-friendly and visually appealing interface.
+- ![Bootstrap](https://img.shields.io/badge/Bootstrap-563D7C?style=flat-square&logo=bootstrap&logoColor=white) - Powers the responsive design and layout, ensuring the application looks great on any screen size.
+- ![JQuery](https://img.shields.io/badge/jQuery-0769AD?style=flat-square&logo=jquery&logoColor=white) - Enhances the user interface with smooth animations and dynamic content updates.
 
 ## 🚀 Features
 
